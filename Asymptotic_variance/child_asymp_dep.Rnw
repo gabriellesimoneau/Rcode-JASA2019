@@ -1,0 +1,116 @@
+<<parent_asymp_dep, echo=FALSE, cache=FALSE>>=
+knitr::set_parent("C:/Users/Gabrielle/Google Drive/McGill - PhD/Thesis/dw-SM/JASA/Supplementary Material")
+@
+
+<<dep_asymptotic, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE>>=
+library(hydroGOF)
+options(scipen = -1, digits = 2)
+
+mainpath <- "C:/Users/Gabrielle/Google Drive/McGill - PhD/Thesis/dw-SM/JASA/Supplementary Material/Reproduce_simulations_results/Asymptotic_variance/"
+secpath <- "Results"
+setwd(paste(mainpath, secpath, sep = ""))
+
+# true blip parameters
+psi1 <- c(0.1, 0.1)
+psi2 <- c(-0.9, 0.6)
+
+# est: first column: blip intercept, second column: interaction with covariate
+# se: first column: se blip intercept, second column: se interaction with covariate
+est_psi1_500 <- read.table("est_dep30_psidWSurv1_500.txt")
+n500 <- 1000 - sum(is.na(est_psi1_500[,1]))
+se_psi1_500 <- read.table("se_dep30_psidWSurv1_500.txt")
+cov_psi1_500 <- c(sum(est_psi1_500[,1] - 1.96*se_psi1_500[,1] < psi1[1] & est_psi1_500[,1] + 1.96*se_psi1_500[,1] > psi1[1], na.rm = TRUE)/n500, sum(est_psi1_500[,2] - 1.96*se_psi1_500[,2] < psi1[2] & est_psi1_500[,2] + 1.96*se_psi1_500[,2] > psi1[2], na.rm = TRUE)/n500)*100
+
+est_psi1_1000 <- read.table("est_dep30_psidWSurv1_1000.txt")
+n1000 <- 1000 - sum(is.na(est_psi1_1000[,1]))
+se_psi1_1000 <- read.table("se_dep30_psidWSurv1_1000.txt")
+cov_psi1_1000 <- c(sum(est_psi1_1000[,1] - 1.96*se_psi1_1000[,1] < psi1[1] & est_psi1_1000[,1] + 1.96*se_psi1_1000[,1] > psi1[1], na.rm = TRUE)/n1000, sum(est_psi1_1000[,2] - 1.96*se_psi1_1000[,2] < psi1[2] & est_psi1_1000[,2] + 1.96*se_psi1_1000[,2] > psi1[2], na.rm = TRUE)/n1000)*100
+
+est_psi1_10000 <- read.table("est_dep30_psidWSurv1_10000.txt")
+n10000 <- 1000 - sum(is.na(est_psi1_10000[,1]))
+se_psi1_10000 <- read.table("se_dep30_psidWSurv1_10000.txt")
+cov_psi1_10000 <- c(sum(est_psi1_10000[,1] - 1.96*se_psi1_10000[,1] < psi1[1] & est_psi1_10000[,1] + 1.96*se_psi1_10000[,1] > psi1[1], na.rm = TRUE)/n10000, sum(est_psi1_10000[,2] - 1.96*se_psi1_10000[,2] < psi1[2] & est_psi1_10000[,2] + 1.96*se_psi1_10000[,2] > psi1[2], na.rm = TRUE)/n10000)*100
+
+est_psi2_500 <- read.table("est_dep30_psidWSurv2_500.txt")
+se_psi2_500 <- read.table("se_dep30_psidWSurv2_500.txt")
+cov_psi2_500 <- c(sum(est_psi2_500[,1] - 1.96*se_psi2_500[,1] < psi2[1] & est_psi2_500[,1] + 1.96*se_psi2_500[,1] > psi2[1], na.rm = TRUE)/n500, sum(est_psi2_500[,2] - 1.96*se_psi2_500[,2] < psi2[2] & est_psi2_500[,2] + 1.96*se_psi2_500[,2] > psi2[2], na.rm = TRUE)/n500)*100
+
+
+est_psi2_1000 <- read.table("est_dep30_psidWSurv2_1000.txt")
+se_psi2_1000 <- read.table("se_dep30_psidWSurv2_1000.txt")
+cov_psi2_1000 <- c(sum(est_psi2_1000[,1] - 1.96*se_psi2_1000[,1] < psi2[1] & est_psi2_1000[,1] + 1.96*se_psi2_1000[,1] > psi2[1], na.rm = TRUE)/n1000, sum(est_psi2_1000[,2] - 1.96*se_psi2_1000[,2] < psi2[2] & est_psi2_1000[,2] + 1.96*se_psi2_1000[,2] > psi2[2], na.rm = TRUE)/n1000)*100
+
+est_psi2_10000 <- read.table("est_dep30_psidWSurv2_10000.txt")
+se_psi2_10000 <- read.table("se_dep30_psidWSurv2_10000.txt")
+cov_psi2_10000 <- c(sum(est_psi2_10000[,1] - 1.96*se_psi2_10000[,1] < psi2[1] & est_psi2_10000[,1] + 1.96*se_psi2_10000[,1] > psi2[1], na.rm = TRUE)/n10000, sum(est_psi2_10000[,2] - 1.96*se_psi2_10000[,2] < psi2[2] & est_psi2_10000[,2] + 1.96*se_psi2_10000[,2] > psi2[2], na.rm = TRUE)/n10000)*100
+
+
+
+
+est_60psi1_500 <- read.table("est_dep60_psidWSurv1_500.txt")
+n500_60 <- 1000 - sum(is.na(est_60psi1_500[,1]))
+se_60psi1_500 <- read.table("se_dep60_psidWSurv1_500.txt")
+cov_60psi1_500 <- c(sum(est_60psi1_500[,1] - 1.96*se_60psi1_500[,1] < psi1[1] & est_60psi1_500[,1] + 1.96*se_60psi1_500[,1] > psi1[1], na.rm = TRUE)/n500_60, sum(est_60psi1_500[,2] - 1.96*se_60psi1_500[,2] < psi1[2] & est_60psi1_500[,2] + 1.96*se_60psi1_500[,2] > psi1[2], na.rm = TRUE)/n500_60)*100
+
+est_60psi1_1000 <- read.table("est_dep60_psidWSurv1_1000.txt")
+n1000_60 <- 1000 - sum(is.na(est_60psi1_1000[,1]))
+se_60psi1_1000 <- read.table("se_dep60_psidWSurv1_1000.txt")
+cov_60psi1_1000 <- c(sum(est_60psi1_1000[,1] - 1.96*se_60psi1_1000[,1] < psi1[1] & est_60psi1_1000[,1] + 1.96*se_60psi1_1000[,1] > psi1[1], na.rm = TRUE)/n1000_60, sum(est_60psi1_1000[,2] - 1.96*se_60psi1_1000[,2] < psi1[2] & est_60psi1_1000[,2] + 1.96*se_60psi1_1000[,2] > psi1[2], na.rm = TRUE)/n1000_60)*100
+
+est_60psi1_10000 <- read.table("est_dep60_psidWSurv1_10000.txt")
+n10000_60 <- 1000 - sum(is.na(est_60psi1_10000[,1]))
+se_60psi1_10000 <- read.table("se_dep60_psidWSurv1_10000.txt")
+cov_60psi1_10000 <- c(sum(est_60psi1_10000[,1] - 1.96*se_60psi1_10000[,1] < psi1[1] & est_60psi1_10000[,1] + 1.96*se_60psi1_10000[,1] > psi1[1], na.rm = TRUE)/n10000_60, sum(est_60psi1_10000[,2] - 1.96*se_60psi1_10000[,2] < psi1[2] & est_60psi1_10000[,2] + 1.96*se_60psi1_10000[,2] > psi1[2], na.rm = TRUE)/n10000_60)*100
+
+est_60psi2_500 <- read.table("est_dep60_psidWSurv2_500.txt")
+se_60psi2_500 <- read.table("se_dep60_psidWSurv2_500.txt")
+cov_60psi2_500 <- c(sum(est_60psi2_500[,1] - 1.96*se_60psi2_500[,1] < psi2[1] & est_60psi2_500[,1] + 1.96*se_60psi2_500[,1] > psi2[1], na.rm = TRUE)/n500_60, sum(est_60psi2_500[,2] - 1.96*se_60psi2_500[,2] < psi2[2] & est_60psi2_500[,2] + 1.96*se_60psi2_500[,2] > psi2[2], na.rm = TRUE)/n500_60)*100
+
+
+est_60psi2_1000 <- read.table("est_dep60_psidWSurv2_1000.txt")
+se_60psi2_1000 <- read.table("se_dep60_psidWSurv2_1000.txt")
+cov_60psi2_1000 <- c(sum(est_60psi2_1000[,1] - 1.96*se_60psi2_1000[,1] < psi2[1] & est_60psi2_1000[,1] + 1.96*se_60psi2_1000[,1] > psi2[1], na.rm = TRUE)/n1000_60, sum(est_60psi2_1000[,2] - 1.96*se_60psi2_1000[,2] < psi2[2] & est_60psi2_1000[,2] + 1.96*se_60psi2_1000[,2] > psi2[2], na.rm = TRUE)/n1000_60)*100
+
+est_60psi2_10000 <- read.table("est_dep60_psidWSurv2_10000.txt")
+se_60psi2_10000 <- read.table("se_dep60_psidWSurv2_10000.txt")
+cov_60psi2_10000 <- c(sum(est_60psi2_10000[,1] - 1.96*se_60psi2_10000[,1] < psi2[1] & est_60psi2_10000[,1] + 1.96*se_60psi2_10000[,1] > psi2[1], na.rm = TRUE)/n10000_60, sum(est_60psi2_10000[,2] - 1.96*se_60psi2_10000[,2] < psi2[2] & est_60psi2_10000[,2] + 1.96*se_60psi2_10000[,2] > psi2[2], na.rm = TRUE)/n10000_60)*100
+
+@
+
+
+\begin{table}[H]
+\centering
+\caption{Comparison of Monte Carlo and standard errors calculated with the asymptotic variance, with 95\% Wald confidence interval coverage, in 1000 datasets with censoring dependent on baseline covariates.}
+{\tabcolsep=4.25pt
+\begin{tabular}{@{}lrrrrrrrrrrrrrrrrrrrr@{}}
+\toprule
+&&\multicolumn{5}{c}{n=300}&&&\multicolumn{5}{c}{n=1,000}&&&\multicolumn{5}{c}{n=10,000}\\
+\multicolumn{1}{c}{$\theta$} && $\text{SE}^{\text{MC}}$ && ESE && Cov. &&& $\text{SE}^{\text{MC}}$ && ESE && Cov. &&& $\text{SE}^{\text{MC}}$ && ESE && Cov. \\
+\midrule
+\multicolumn{21}{l}{30\% independent censoring}\\
+
+\enspace \enspace $\psi_{10}$ && \Sexpr{round(apply(est_psi1_500, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_psi1_500, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_psi1_500[1], 1)}\% &&& \Sexpr{round(apply(est_psi1_1000, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_psi1_1000, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_psi1_1000[1], 1)}\% &&& \Sexpr{round(apply(est_psi1_10000, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_psi1_10000, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_psi1_10000[1], 1)}\%\\
+
+\enspace \enspace $\psi_{11}$ && \Sexpr{round(apply(est_psi1_500, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_psi1_500, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_psi1_500[2], 1)}\% &&& \Sexpr{round(apply(est_psi1_1000, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_psi1_1000, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_psi1_1000[2], 1)}\% &&& \Sexpr{round(apply(est_psi1_10000, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_psi1_10000, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_psi1_10000[2], 1)}\%\\
+
+\enspace \enspace $\psi_{20}$ && \Sexpr{round(apply(est_psi2_500, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_psi2_500, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_psi2_500[1], 1)}\% &&& \Sexpr{round(apply(est_psi2_1000, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_psi2_1000, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_psi2_1000[1], 1)}\% &&& \Sexpr{round(apply(est_psi2_10000, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_psi2_10000, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_psi2_10000[1], 1)}\%\\
+
+\enspace \enspace $\psi_{21}$ && \Sexpr{round(apply(est_psi2_500, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_psi2_500, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_psi2_500[2], 1)}\% &&& \Sexpr{round(apply(est_psi2_1000, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_psi2_1000, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_psi2_1000[2], 1)}\% &&& \Sexpr{round(apply(est_psi2_10000, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_psi2_10000, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_psi2_10000[2], 1)}\%\\
+
+\addlinespace
+
+\multicolumn{21}{l}{60\% independent censoring}\\
+
+\enspace \enspace $\psi_{10}$ && \Sexpr{round(apply(est_60psi1_500, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_60psi1_500, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_60psi1_500[1], 1)}\% &&& \Sexpr{round(apply(est_60psi1_1000, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_60psi1_1000, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_60psi1_1000[1], 1)}\% &&& \Sexpr{round(apply(est_60psi1_10000, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_60psi1_10000, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_60psi1_10000[1], 1)}\%\\
+
+\enspace \enspace $\psi_{11}$ && \Sexpr{round(apply(est_60psi1_500, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_60psi1_500, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_60psi1_500[2], 1)}\% &&& \Sexpr{round(apply(est_60psi1_1000, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_60psi1_1000, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_60psi1_1000[2], 1)}\% &&& \Sexpr{round(apply(est_60psi1_10000, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_60psi1_10000, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_60psi1_10000[2], 1)}\%\\
+
+\enspace \enspace $\psi_{20}$ && \Sexpr{round(apply(est_60psi2_500, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_60psi2_500, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_60psi2_500[1], 1)}\% &&& \Sexpr{round(apply(est_60psi2_1000, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_60psi2_1000, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_60psi2_1000[1], 1)}\% &&& \Sexpr{round(apply(est_60psi2_10000, 2, sd, na.rm = TRUE)[1], 2)} && \Sexpr{round(apply(se_60psi2_10000, 2, mean, na.rm = TRUE)[1], 2)} && \Sexpr{round(cov_60psi2_10000[1], 1)}\%\\
+
+\enspace \enspace $\psi_{21}$ && \Sexpr{round(apply(est_60psi2_500, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_60psi2_500, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_60psi2_500[2], 1)}\% &&& \Sexpr{round(apply(est_60psi2_1000, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_60psi2_1000, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_60psi2_1000[2], 1)}\% &&& \Sexpr{round(apply(est_60psi2_10000, 2, sd, na.rm = TRUE)[2], 2)} && \Sexpr{round(apply(se_60psi2_10000, 2, mean, na.rm = TRUE)[2], 2)} && \Sexpr{round(cov_60psi2_10000[2], 1)}\%\\
+\bottomrule
+\multicolumn{21}{l}{{\scriptsize{$\text{SE}^{\text{MC}}$, Monte Carlo standard error; ESE, estimated standard errors; Cov., coverage of 95\% CI}}}\\
+\end{tabular}}
+\end{table}
+
+

@@ -1,0 +1,1035 @@
+library(survival)
+library(DTRreg)
+expit <- function(x) exp(x) / (1 + exp(x))
+mainpath <- "C:/Users/Gabrielle/Google Drive/McGill - PhD/Thesis/dw-SM/JASA/Supplementary Material/Reproduce_simulations_results/"
+
+# true parameters
+theta1 <- c(6.31578947, 1.5, -0.8, 0.1, 0.1)
+theta2 <- c(4, 1.1052632, -0.2105263, -0.9, 0.6, -0.1052632)
+lambda <- 1/300
+p <- 0.9
+beta <- 2
+
+#### independent censoring, 30% censoring, n=500, 1000 ####
+set.seed(1020)
+
+for(n in c(500, 1000)){
+  optimal <- fixed00 <- fixed01 <- fixed10 <- fixed11 <- dWSurv_opt <- Huang_opt <- rep(NA, 10000)
+
+  X1 <- runif(n, 0.1, 1.29)
+  X14 <- X1^4
+  A1 <- rbinom(n, size = 1, prob = expit(2*X1 - 1))
+  X2 <- runif(n, 0.9, 2)
+  X23 <- X2^3
+  A2 <- rbinom(n, size = 1, prob = expit(-2*X2 + 2.8))
+  delta <- rbinom(n, size = 1, prob = 0.6)
+  eta2 <- rbinom(n, 1, prob = 0.8)
+  delta2 <- delta[eta2 == 1]
+
+  logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1 & delta == 1] + theta2[3]*X23[eta2 == 1 & delta == 1] + theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1] + theta2[6]*X1[eta2 == 1 & delta == 1] + rnorm(sum(eta2*delta), sd = 0.3)
+  A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logT2opt <- logT2 + (A2opt - A2[eta2 == 1 & delta == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1 & delta == 1])
+  logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n,sd = 0.3)
+  T1 <- exp(logT[eta2 == 1 & delta == 1]) - exp(logT2opt)
+  if(min(T1) <= 0){
+    next
+  }
+  C <- rexp(n - sum(delta), rate = 1/300)
+
+  Y2 <- rep(NA, n)
+  Y1 <- rep(NA, n)
+  eta2d0 <- eta2[delta == 0]
+  C1 <- rep(NA, length(C))
+  C2 <- rep(NA, length(C))
+  for(j in 1:length(C))
+  {
+    if(eta2d0[j] == 0){
+      C1[j] <-  C[j]
+      C2[j] <- 0
+    }else{
+      C1[j] <- runif(1, 0, C[j])
+      C2[j] <- C[j] - C1[j]
+    }
+  }
+  Y2[delta == 0] <- C2
+  Y1[delta == 0] <- C1
+  Y1[delta == 1 & eta2 == 1] <- T1
+  Y1[delta == 1 & eta2 == 0] <- exp(logT[delta == 1 & eta2 == 0])
+  Y2[delta == 1 & eta2 == 0] <- 0
+  Y2[delta == 1 & eta2 == 1] <- exp(logT2)
+
+  # fit dWSurv
+  mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
+  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+
+  # fit Huang and Ning
+  logY2 <- log(Y2[eta2 == 1 & delta == 1])
+  logY <- log(Y1 + Y2)
+  delta_C <- abs(delta - 1)
+  Y_C <- exp(logY)
+  delta22 <- rep(NA, n)
+  delta22[eta2 == 1] <- delta2
+  logY22 <- rep(NA, n)
+  logY22[eta2 == 1 & delta == 1] <- logY2
+  logY11 <- rep(NA, n)
+  logY11[eta2 == 1 & delta == 1] <- log(T1)
+
+  mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, delta22, delta_C, logY, logY11, logY22, Y_C, eta2))
+  mydata <- mydata[order(mydata$Y_C), ]
+
+  eta2 <- mydata$eta2
+  X1 <- mydata$X1
+  X14 <- mydata$X14
+  A1 <- mydata$A1
+  X2 <- mydata$X2
+  X23 <- mydata$X23
+  A2 <- mydata$A2
+  delta <- mydata$delta
+  delta2 <- mydata$delta22[eta2 == 1]
+  logY <- mydata$logY
+  logY1 <- mydata$logY11[eta2 == 1 & delta == 1]
+  logY2 <- mydata$logY22[eta2 == 1 & delta == 1]
+
+  km <- survfit(Surv(Y_C, delta_C) ~ 1, data = mydata)
+  mydata$ipcw <- summary(km, times = mydata$Y_C)$surv
+
+  # stage 2
+  data2 <- as.data.frame(cbind(int = rep(1, sum(eta2)), X1 = X1[eta2 == 1], X2 = X2[eta2 == 1], X23 = X23[eta2 == 1], A2 = A2[eta2 == 1], A2X2 = A2[eta2 == 1]*X2[eta2 == 1]))
+  H2 <- cbind(data2$int, data2$X2, data2$X23, data2$X1, data2$A2, data2$A2X2)
+  w <- 1/mydata$ipcw
+  H22 <- H2[delta2 == 1, ]
+  w22 <- w[delta == 1 & eta2 == 1]
+  psiHuang2 <- as.vector(solve(t(H22) %*% (w22*H22)) %*% t(H22) %*% (w22*logY2))[(ncol(H2)-1):ncol(H2)]
+
+  # pseudo-outcome
+  logYtilde <- logY
+  A2opt <- ifelse(psiHuang2[1] + psiHuang2[2]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logYtilde[eta2 == 1 & delta == 1] <- log(exp(logY1) + exp(logY2 + (A2opt - A2[eta2 == 1 & delta == 1]) * (psiHuang2[1] + psiHuang2[2]*X2[eta2 == 1 & delta == 1])))
+
+  # first stage estimation
+  data1 <- as.data.frame(cbind(int = rep(1, n), X1, X14, A1, A1X1 = A1*X1))
+  H1 <- cbind(data1$int, data1$X1, data1$X14, data1$A1, data1$A1X1)
+  H11 <- H1[delta == 1, ]
+  logYtilde <- logYtilde[delta == 1]
+  w11 <- w[delta == 1]
+  psiHuang1 <- as.vector(solve(t(H11) %*% (w11 * H11)) %*% t(H11) %*% (w11 * logYtilde))[(ncol(H1)-1):ncol(H1)]
+
+  # simulate large dataset according to different treatment allocation
+  n_large <- 10000
+  ok <- TRUE
+  while(ok){
+    X1 <- runif(n_large, 0.1, 1.29)
+    X14 <- X1^4
+    X2 <- runif(n_large, 0.9, 2)
+    X23 <- X2^3
+    eta2 <- rbinom(n_large, 1, prob = 0.8)
+
+    # fixed00
+    A1 <- A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed00 <- logT
+
+    # fixed11
+    A1 <- A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed11 <- logT
+
+    # fixed01
+    A1 <- rep(0, n_large)
+    A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed01 <- logT
+
+    # fixed10
+    A1 <- rep(1, n_large)
+    A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed10 <- logT
+
+    # true optimal
+    A1 <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
+    A2 <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    optimal <- logT
+
+    # dWSurv optimal
+    A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
+    A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    dWSurv_opt <- logT
+
+    # Huang optimal
+    A1 <- ifelse(psiHuang1[1] + psiHuang1[2]*X1 > 0, 1, 0)
+    A2 <- ifelse(psiHuang2[1] + psiHuang2[2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    Huang_opt <- logT
+
+    ok <- FALSE
+  }
+  res <- as.data.frame(cbind(optimal, dWSurv_opt, Huang_opt, fixed00, fixed01, fixed10, fixed11))
+  name <- paste(mainpath, "Comparison_survival_time/Results/indep30_", n, ".txt", sep = "")
+  write.table(res, file = name)
+}
+
+#### baseline dependent censoring, 30% censoring, n=500, 1000 ####
+set.seed(345)
+
+for(n in c(500, 1000)){
+  optimal <- fixed00 <- fixed01 <- fixed10 <- fixed11 <- dWSurv_opt <- Huang_opt <- rep(NA, 10000)
+  
+  X1 <- runif(n, 0.1, 1.29)
+  X14 <- X1^4
+  A1 <- rbinom(n, size = 1, prob = expit(2*X1 - 1))
+  X2 <- runif(n, 0.9, 2)
+  X23 <- X2^3
+  A2 <- rbinom(n, size = 1, prob = expit(-2*X2 + 2.8))
+  delta <- rbinom(n, size = 1, prob = expit(2*X1 - 0.4))
+  eta2 <- rbinom(n, 1, prob = 0.8)
+  delta2 <- delta[eta2 == 1]
+  
+  logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1 & delta == 1] + theta2[3]*X23[eta2 == 1 & delta == 1] + theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1] + theta2[6]*X1[eta2 == 1 & delta == 1] + rnorm(sum(eta2*delta), sd = 0.3)
+  trueA2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logT2opt <- logT2 + (trueA2opt - A2[eta2 == 1 & delta == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1 & delta == 1])
+  logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n,sd = 0.3)
+  T1 <- exp(logT[eta2 == 1 & delta == 1]) - exp(logT2opt)
+  if(min(T1) <= 0){
+    next
+  }
+  C <- (-log(runif(n - sum(delta), 0, 1))/(lambda*exp(beta*X1[delta == 0])))^(1/p)
+  
+  Y2 <- rep(NA, n)
+  Y1 <- rep(NA, n)
+  eta2d0 <- eta2[delta == 0]
+  C1 <- rep(NA, length(C))
+  C2 <- rep(NA, length(C))
+  for(j in 1:length(C))
+  {
+    if(eta2d0[j] == 0){
+      C1[j] <-  C[j]
+      C2[j] <- 0
+    }else{
+      C1[j] <- runif(1, 0, C[j])
+      C2[j] <- C[j] - C1[j]
+    }
+  }
+  Y2[delta == 0] <- C2
+  Y1[delta == 0] <- C1
+  Y1[delta == 1 & eta2 == 1] <- T1
+  Y1[delta == 1 & eta2 == 0] <- exp(logT[delta == 1 & eta2 == 0])
+  Y2[delta == 1 & eta2 == 0] <- 0
+  Y2[delta == 1 & eta2 == 1] <- exp(logT2)
+  
+  # fit dWSurv
+  mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
+  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  
+  # fit Huang and Ning
+  logY2 <- log(Y2[eta2 == 1 & delta == 1])
+  logY <- log(Y1 + Y2)
+  logY1 <- log(Y1[eta2 == 1 & delta == 1])
+  delta_C <- abs(delta - 1)
+  Y_C <- exp(logY)
+  coxm <- coxph(Surv(Y_C, delta_C) ~ X1)
+  bh <- basehaz(coxm)[,1]
+  mydata$ipcw <- exp(-bh*exp(X1*coef(coxm)))
+  
+  # stage 2
+  data2 <- as.data.frame(cbind(int = rep(1, sum(eta2)), X1 = X1[eta2 == 1], X2 = X2[eta2 == 1], X23 = X23[eta2 == 1], A2 = A2[eta2 == 1], A2X2 = A2[eta2 == 1]*X2[eta2 == 1]))
+  H2 <- cbind(data2$int, data2$X2, data2$X23, data2$X1, data2$A2, data2$A2X2)
+  w <- 1/mydata$ipcw
+  H22 <- H2[delta2 == 1, ]
+  w22 <- w[delta == 1 & eta2 == 1]
+  psiHuang2 <- as.vector(solve(t(H22) %*% (w22*H22)) %*% t(H22) %*% (w22*logY2))[(ncol(H2)-1):ncol(H2)]
+  
+  # pseudo-outcome
+  logYtilde <- logY
+  A2opt <- ifelse(psiHuang2[1] + psiHuang2[2]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logYtilde[eta2 == 1 & delta == 1] <- log(exp(logY1) + exp(logY2 + (A2opt - A2[eta2 == 1 & delta == 1]) * (psiHuang2[1] + psiHuang2[2]*X2[eta2 == 1 & delta == 1])))
+  
+  # first stage estimation
+  data1 <- as.data.frame(cbind(int = rep(1, n), X1, X14, A1, A1X1 = A1*X1))
+  H1 <- cbind(data1$int, data1$X1, data1$X14, data1$A1, data1$A1X1)
+  H11 <- H1[delta == 1, ]
+  logYtilde <- logYtilde[delta == 1]
+  w11 <- w[delta == 1]
+  psiHuang1 <- as.vector(solve(t(H11) %*% (w11 * H11)) %*% t(H11) %*% (w11 * logYtilde))[(ncol(H1)-1):ncol(H1)]
+  
+  # simulate large dataset according to different treatment allocation
+  n_large <- 10000
+  ok <- TRUE
+  while(ok){
+    X1 <- runif(n_large, 0.1, 1.29)
+    X14 <- X1^4
+    X2 <- runif(n_large, 0.9, 2)
+    X23 <- X2^3
+    eta2 <- rbinom(n_large, 1, prob = 0.8)
+    
+    # fixed00
+    A1 <- A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed00 <- logT
+    
+    # fixed11
+    A1 <- A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed11 <- logT
+    
+    # fixed01
+    A1 <- rep(0, n_large)
+    A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed01 <- logT
+    
+    # fixed10
+    A1 <- rep(1, n_large)
+    A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed10 <- logT
+    
+    # true optimal
+    A1 <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
+    A2 <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    optimal <- logT
+    
+    # dWSurv optimal
+    A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
+    A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    dWSurv_opt <- logT
+    
+    # Huang optimal
+    A1 <- ifelse(psiHuang1[1] + psiHuang1[2]*X1 > 0, 1, 0)
+    A2 <- ifelse(psiHuang2[1] + psiHuang2[2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    Huang_opt <- logT
+    
+    ok <- FALSE
+  }
+  res <- as.data.frame(cbind(optimal, dWSurv_opt, Huang_opt, fixed00, fixed01, fixed10, fixed11))
+  name <- paste(mainpath, "Comparison_survival_time/Results/X1dep30_", n, ".txt", sep = "")
+  write.table(res, file = name)
+}
+
+#### independent censoring, 60% censoring, n=500, 1000 ####
+set.seed(4409)
+
+for(n in c(500, 1000)){
+  optimal <- fixed00 <- fixed01 <- fixed10 <- fixed11 <- dWSurv_opt <- Huang_opt <- rep(NA, 10000)
+  
+  X1 <- runif(n, 0.1, 1.29)
+  X14 <- X1^4
+  A1 <- rbinom(n, size = 1, prob = expit(2*X1 - 1))
+  X2 <- runif(n, 0.9, 2)
+  X23 <- X2^3
+  A2 <- rbinom(n, size = 1, prob = expit(-2*X2 + 2.8))
+  delta <- rbinom(n, size = 1, prob = 0.4)
+  eta2 <- rbinom(n, 1, prob = 0.8)
+  delta2 <- delta[eta2 == 1]
+  
+  logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1 & delta == 1] + theta2[3]*X23[eta2 == 1 & delta == 1] + theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1] + theta2[6]*X1[eta2 == 1 & delta == 1] + rnorm(sum(eta2*delta), sd = 0.3)
+  A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logT2opt <- logT2 + (A2opt - A2[eta2 == 1 & delta == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1 & delta == 1])
+  logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n,sd = 0.3)
+  T1 <- exp(logT[eta2 == 1 & delta == 1]) - exp(logT2opt)
+  if(min(T1) <= 0){
+    next
+  }
+  C <- rexp(n - sum(delta), rate = 1/300)
+  
+  Y2 <- rep(NA, n)
+  Y1 <- rep(NA, n)
+  eta2d0 <- eta2[delta == 0]
+  C1 <- rep(NA, length(C))
+  C2 <- rep(NA, length(C))
+  for(j in 1:length(C))
+  {
+    if(eta2d0[j] == 0){
+      C1[j] <-  C[j]
+      C2[j] <- 0
+    }else{
+      C1[j] <- runif(1, 0, C[j])
+      C2[j] <- C[j] - C1[j]
+    }
+  }
+  Y2[delta == 0] <- C2
+  Y1[delta == 0] <- C1
+  Y1[delta == 1 & eta2 == 1] <- T1
+  Y1[delta == 1 & eta2 == 0] <- exp(logT[delta == 1 & eta2 == 0])
+  Y2[delta == 1 & eta2 == 0] <- 0
+  Y2[delta == 1 & eta2 == 1] <- exp(logT2)
+  
+  # fit dWSurv
+  mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
+  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  
+  # fit Huang and Ning
+  logY2 <- log(Y2[eta2 == 1 & delta == 1])
+  logY <- log(Y1 + Y2)
+  delta_C <- abs(delta - 1)
+  Y_C <- exp(logY)
+  delta22 <- rep(NA, n)
+  delta22[eta2 == 1] <- delta2
+  logY22 <- rep(NA, n)
+  logY22[eta2 == 1 & delta == 1] <- logY2
+  logY11 <- rep(NA, n)
+  logY11[eta2 == 1 & delta == 1] <- log(T1)
+  
+  mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, delta22, delta_C, logY, logY11, logY22, Y_C, eta2))
+  mydata <- mydata[order(mydata$Y_C), ]
+  
+  eta2 <- mydata$eta2
+  X1 <- mydata$X1
+  X14 <- mydata$X14
+  A1 <- mydata$A1
+  X2 <- mydata$X2
+  X23 <- mydata$X23
+  A2 <- mydata$A2
+  delta <- mydata$delta
+  delta2 <- mydata$delta22[eta2 == 1]
+  logY <- mydata$logY
+  logY1 <- mydata$logY11[eta2 == 1 & delta == 1]
+  logY2 <- mydata$logY22[eta2 == 1 & delta == 1]
+  
+  km <- survfit(Surv(Y_C, delta_C) ~ 1, data = mydata)
+  mydata$ipcw <- summary(km, times = mydata$Y_C)$surv
+  
+  # stage 2
+  data2 <- as.data.frame(cbind(int = rep(1, sum(eta2)), X1 = X1[eta2 == 1], X2 = X2[eta2 == 1], X23 = X23[eta2 == 1], A2 = A2[eta2 == 1], A2X2 = A2[eta2 == 1]*X2[eta2 == 1]))
+  H2 <- cbind(data2$int, data2$X2, data2$X23, data2$X1, data2$A2, data2$A2X2)
+  w <- 1/mydata$ipcw
+  H22 <- H2[delta2 == 1, ]
+  w22 <- w[delta == 1 & eta2 == 1]
+  psiHuang2 <- as.vector(solve(t(H22) %*% (w22*H22)) %*% t(H22) %*% (w22*logY2))[(ncol(H2)-1):ncol(H2)]
+  
+  # pseudo-outcome
+  logYtilde <- logY
+  A2opt <- ifelse(psiHuang2[1] + psiHuang2[2]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logYtilde[eta2 == 1 & delta == 1] <- log(exp(logY1) + exp(logY2 + (A2opt - A2[eta2 == 1 & delta == 1]) * (psiHuang2[1] + psiHuang2[2]*X2[eta2 == 1 & delta == 1])))
+  
+  # first stage estimation
+  data1 <- as.data.frame(cbind(int = rep(1, n), X1, X14, A1, A1X1 = A1*X1))
+  H1 <- cbind(data1$int, data1$X1, data1$X14, data1$A1, data1$A1X1)
+  H11 <- H1[delta == 1, ]
+  logYtilde <- logYtilde[delta == 1]
+  w11 <- w[delta == 1]
+  psiHuang1 <- as.vector(solve(t(H11) %*% (w11 * H11)) %*% t(H11) %*% (w11 * logYtilde))[(ncol(H1)-1):ncol(H1)]
+  
+  # simulate large dataset according to different treatment allocation
+  n_large <- 10000
+  ok <- TRUE
+  while(ok){
+    X1 <- runif(n_large, 0.1, 1.29)
+    X14 <- X1^4
+    X2 <- runif(n_large, 0.9, 2)
+    X23 <- X2^3
+    eta2 <- rbinom(n_large, 1, prob = 0.8)
+    
+    # fixed00
+    A1 <- A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed00 <- logT
+    
+    # fixed11
+    A1 <- A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed11 <- logT
+    
+    # fixed01
+    A1 <- rep(0, n_large)
+    A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed01 <- logT
+    
+    # fixed10
+    A1 <- rep(1, n_large)
+    A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed10 <- logT
+    
+    # true optimal
+    A1 <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
+    A2 <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    optimal <- logT
+    
+    # dWSurv optimal
+    A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
+    A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    dWSurv_opt <- logT
+    
+    # Huang optimal
+    A1 <- ifelse(psiHuang1[1] + psiHuang1[2]*X1 > 0, 1, 0)
+    A2 <- ifelse(psiHuang2[1] + psiHuang2[2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    Huang_opt <- logT
+    
+    ok <- FALSE
+  }
+  res <- as.data.frame(cbind(optimal, dWSurv_opt, Huang_opt, fixed00, fixed01, fixed10, fixed11))
+  name <- paste(mainpath, "Comparison_survival_time/Results/indep60_", n, ".txt", sep = "")
+  write.table(res, file = name)
+}
+
+#### baseline dependent censoring, 60% censoring, n=500, 1000 ####
+set.seed(20)
+
+for(n in c(500, 1000)){
+  optimal <- fixed00 <- fixed01 <- fixed10 <- fixed11 <- dWSurv_opt <- Huang_opt <- rep(NA, 10000)
+
+  X1 <- runif(n, 0.1, 1.29)
+  X14 <- X1^4
+  A1 <- rbinom(n, size = 1, prob = expit(2*X1 - 1))
+  X2 <- runif(n, 0.9, 2)
+  X23 <- X2^3
+  A2 <- rbinom(n, size = 1, prob = expit(-2*X2 + 2.8))
+  delta <- rbinom(n, size = 1, prob = expit(2*X1 - 1.8))
+  eta2 <- rbinom(n, 1, prob = 0.8)
+  delta2 <- delta[eta2 == 1]
+
+  logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1 & delta == 1] + theta2[3]*X23[eta2 == 1 & delta == 1] + theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1] + theta2[6]*X1[eta2 == 1 & delta == 1] + rnorm(sum(eta2*delta), sd = 0.3)
+  trueA2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logT2opt <- logT2 + (trueA2opt - A2[eta2 == 1 & delta == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1 & delta == 1])
+  logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n,sd = 0.3)
+  T1 <- exp(logT[eta2 == 1 & delta == 1]) - exp(logT2opt)
+  if(min(T1) <= 0){
+    next
+  }
+  C <- (-log(runif(n - sum(delta), 0, 1))/(lambda*exp(beta*X1[delta == 0])))^(1/p)
+
+  Y2 <- rep(NA, n)
+  Y1 <- rep(NA, n)
+  eta2d0 <- eta2[delta == 0]
+  C1 <- rep(NA, length(C))
+  C2 <- rep(NA, length(C))
+  for(j in 1:length(C))
+  {
+    if(eta2d0[j] == 0){
+      C1[j] <-  C[j]
+      C2[j] <- 0
+    }else{
+      C1[j] <- runif(1, 0, C[j])
+      C2[j] <- C[j] - C1[j]
+    }
+  }
+  Y2[delta == 0] <- C2
+  Y1[delta == 0] <- C1
+  Y1[delta == 1 & eta2 == 1] <- T1
+  Y1[delta == 1 & eta2 == 0] <- exp(logT[delta == 1 & eta2 == 0])
+  Y2[delta == 1 & eta2 == 0] <- 0
+  Y2[delta == 1 & eta2 == 1] <- exp(logT2)
+
+  # fit dWSurv
+  mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
+  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+
+  # fit Huang and Ning
+  logY2 <- log(Y2[eta2 == 1 & delta == 1])
+  logY <- log(Y1 + Y2)
+  logY1 <- log(Y1[eta2 == 1 & delta == 1])
+  delta_C <- abs(delta - 1)
+  Y_C <- exp(logY)
+  coxm <- coxph(Surv(Y_C, delta_C) ~ X1)
+  bh <- basehaz(coxm)[,1]
+  mydata$ipcw <- exp(-bh*exp(X1*coef(coxm)))
+
+  # stage 2
+  data2 <- as.data.frame(cbind(int = rep(1, sum(eta2)), X1 = X1[eta2 == 1], X2 = X2[eta2 == 1], X23 = X23[eta2 == 1], A2 = A2[eta2 == 1], A2X2 = A2[eta2 == 1]*X2[eta2 == 1]))
+  H2 <- cbind(data2$int, data2$X2, data2$X23, data2$X1, data2$A2, data2$A2X2)
+  w <- 1/mydata$ipcw
+  H22 <- H2[delta2 == 1, ]
+  w22 <- w[delta == 1 & eta2 == 1]
+  psiHuang2 <- as.vector(solve(t(H22) %*% (w22*H22)) %*% t(H22) %*% (w22*logY2))[(ncol(H2)-1):ncol(H2)]
+
+  # pseudo-outcome
+  logYtilde <- logY
+  A2opt <- ifelse(psiHuang2[1] + psiHuang2[2]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logYtilde[eta2 == 1 & delta == 1] <- log(exp(logY1) + exp(logY2 + (A2opt - A2[eta2 == 1 & delta == 1]) * (psiHuang2[1] + psiHuang2[2]*X2[eta2 == 1 & delta == 1])))
+
+  # first stage estimation
+  data1 <- as.data.frame(cbind(int = rep(1, n), X1, X14, A1, A1X1 = A1*X1))
+  H1 <- cbind(data1$int, data1$X1, data1$X14, data1$A1, data1$A1X1)
+  H11 <- H1[delta == 1, ]
+  logYtilde <- logYtilde[delta == 1]
+  w11 <- w[delta == 1]
+  psiHuang1 <- as.vector(solve(t(H11) %*% (w11 * H11)) %*% t(H11) %*% (w11 * logYtilde))[(ncol(H1)-1):ncol(H1)]
+
+  # simulate large dataset according to different treatment allocation
+  n_large <- 10000
+  ok <- TRUE
+  while(ok){
+    X1 <- runif(n_large, 0.1, 1.29)
+    X14 <- X1^4
+    X2 <- runif(n_large, 0.9, 2)
+    X23 <- X2^3
+    eta2 <- rbinom(n_large, 1, prob = 0.8)
+
+    # fixed00
+    A1 <- A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed00 <- logT
+
+    # fixed11
+    A1 <- A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed11 <- logT
+
+    # fixed01
+    A1 <- rep(0, n_large)
+    A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed01 <- logT
+
+    # fixed10
+    A1 <- rep(1, n_large)
+    A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed10 <- logT
+
+    # true optimal
+    A1 <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
+    A2 <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    optimal <- logT
+
+    # dWSurv optimal
+    A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
+    A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    dWSurv_opt <- logT
+
+    # Huang optimal
+    A1 <- ifelse(psiHuang1[1] + psiHuang1[2]*X1 > 0, 1, 0)
+    A2 <- ifelse(psiHuang2[1] + psiHuang2[2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    Huang_opt <- logT
+
+    ok <- FALSE
+  }
+  res <- as.data.frame(cbind(optimal, dWSurv_opt, Huang_opt, fixed00, fixed01, fixed10, fixed11))
+  name <- paste(mainpath, "Comparison_survival_time/Results/X1dep60_", n, ".txt", sep = "")
+  write.table(res, file = name)
+}
+
+#### time-varying dependent censoring, 30% censoring, n=500, 1000 ####
+set.seed(994)
+
+for(n in c(500, 1000)){
+  optimal <- fixed00 <- fixed01 <- fixed10 <- fixed11 <- dWSurv_opt <- rep(NA, 10000)
+  
+  X1 <- runif(n, 0.1, 1.29) 
+  X14 <- X1^4
+  A1 <- rbinom(n, size = 1, prob = expit(2*X1 - 1))
+  X2 <- runif(n, 0.9, 2) 
+  X23 <- X2^3
+  A2 <- rbinom(n, size = 1, prob = expit(-2*X2 + 2.8))
+  
+  pC1 <- expit(2*X1 - 0.2)/(1 - 0.0805*0.8)
+  C1 <- rbinom(n, 1, pC1)
+  eta2 <- rep(0, n)
+  eta2[C1 == 1] <- rbinom(sum(C1), 1, 0.8)
+  delta2 <- rbinom(sum(eta2), 1, 1 - expit(0.3 - 2*X2[eta2 == 1]))
+  delta <- rep(1, n)
+  delta[C1 == 0] <- 0
+  delta[eta2 == 1] <- delta2
+  
+  logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1 & delta == 1] + theta2[3]*X23[eta2 == 1 & delta == 1] + theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1] + theta2[6]*X1[eta2 == 1 & delta == 1] + rnorm(sum(eta2*delta), sd = 0.3)
+  trueA2opt <- ifelse(theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logT2opt <- logT2 + (trueA2opt - A2[eta2 == 1 & delta == 1])*(theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1])
+  logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n,sd = 0.3) 
+  T1 <- exp(logT[eta2 == 1 & delta == 1]) - exp(logT2opt)
+  if(min(T1) <= 0){
+    next
+  }
+  C <- rexp(n - sum(delta), rate = 1/300)
+  
+  Y2 <- rep(NA, n)
+  Y1 <- rep(NA, n)
+  eta2d0 <- eta2[delta == 0]
+  C1 <- rep(NA, length(C))
+  C2 <- rep(NA, length(C))
+  for(j in 1:length(C))
+  {
+    if(eta2d0[j] == 0){
+      C1[j] <-  C[j]
+      C2[j] <- 0
+    }else{
+      C1[j] <- runif(1, 0, C[j])
+      C2[j] <- C[j] - C1[j]
+    }
+  }
+  Y2[delta == 0] <- C2
+  Y1[delta == 0] <- C1
+  Y1[delta == 1 & eta2 == 1] <- T1
+  Y1[delta == 1 & eta2 == 0] <- exp(logT[delta == 1 & eta2 == 0])
+  Y2[delta == 1 & eta2 == 0] <- 0
+  Y2[delta == 1 & eta2 == 1] <- exp(logT2)
+  
+  # fit dWSurv
+  mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
+  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  
+  # simulate large dataset according to different treatment allocation
+  n_large <- 10000
+  ok <- TRUE
+  while(ok){
+    X1 <- runif(n_large, 0.1, 1.29)
+    X14 <- X1^4
+    X2 <- runif(n_large, 0.9, 2)
+    X23 <- X2^3
+    eta2 <- rbinom(n_large, 1, prob = 0.8)
+    
+    # fixed00
+    A1 <- A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed00 <- logT
+    
+    # fixed11
+    A1 <- A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed11 <- logT
+    
+    # fixed01
+    A1 <- rep(0, n_large)
+    A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed01 <- logT
+    
+    # fixed10
+    A1 <- rep(1, n_large)
+    A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed10 <- logT
+    
+    # true optimal
+    A1 <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
+    A2 <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    optimal <- logT
+    
+    # dWSurv optimal
+    A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
+    A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    dWSurv_opt <- logT
+    
+    ok <- FALSE
+  }
+  res <- as.data.frame(cbind(optimal, dWSurv_opt, fixed00, fixed01, fixed10, fixed11))
+  name <- paste(mainpath, "Comparison_survival_time/Results/X1X2dep30_", n, ".txt", sep = "")
+  write.table(res, file = name)
+}
+
+#### time-varying dependent censoring, 60% censoring, n=500, 1000 ####
+set.seed(276)
+
+for(n in c(500, 1000)){
+  optimal <- fixed00 <- fixed01 <- fixed10 <- fixed11 <- dWSurv_opt <- rep(NA, 10000)
+  
+  X1 <- runif(n, 0.1, 1.29) 
+  X14 <- X1^4
+  A1 <- rbinom(n, size = 1, prob = expit(2*X1 - 1))
+  X2 <- runif(n, 0.9, 2) 
+  X23 <- X2^3
+  A2 <- rbinom(n, size = 1, prob = expit(-2*X2 + 2.8))
+  
+  pC1 <- expit(2*X1 - 1.8)/(1 - 0.1466*0.8)
+  C1 <- rbinom(n, 1, pC1)
+  eta2 <- rep(0, n)
+  eta2[C1 == 1] <- rbinom(sum(C1), 1, 0.8)
+  delta2 <- rbinom(sum(eta2), 1, 1 - expit(1 - 2*X2[eta2 == 1]))
+  delta <- rep(1, n)
+  delta[C1 == 0] <- 0
+  delta[eta2 == 1] <- delta2
+  
+  logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1 & delta == 1] + theta2[3]*X23[eta2 == 1 & delta == 1] + theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1] + theta2[6]*X1[eta2 == 1 & delta == 1] + rnorm(sum(eta2*delta), sd = 0.3)
+  trueA2opt <- ifelse(theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1] > 0, 1, 0)
+  logT2opt <- logT2 + (trueA2opt - A2[eta2 == 1 & delta == 1])*(theta2[4]*A2[eta2 == 1 & delta == 1] + theta2[5]*A2[eta2 == 1 & delta == 1]*X2[eta2 == 1 & delta == 1])
+  logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n,sd = 0.3) 
+  T1 <- exp(logT[eta2 == 1 & delta == 1]) - exp(logT2opt)
+  if(min(T1) <= 0){
+    next
+  }
+  C <- rexp(n - sum(delta), rate = 1/300)
+  
+  Y2 <- rep(NA, n)
+  Y1 <- rep(NA, n)
+  eta2d0 <- eta2[delta == 0]
+  C1 <- rep(NA, length(C))
+  C2 <- rep(NA, length(C))
+  for(j in 1:length(C))
+  {
+    if(eta2d0[j] == 0){
+      C1[j] <-  C[j]
+      C2[j] <- 0
+    }else{
+      C1[j] <- runif(1, 0, C[j])
+      C2[j] <- C[j] - C1[j]
+    }
+  }
+  Y2[delta == 0] <- C2
+  Y1[delta == 0] <- C1
+  Y1[delta == 1 & eta2 == 1] <- T1
+  Y1[delta == 1 & eta2 == 0] <- exp(logT[delta == 1 & eta2 == 0])
+  Y2[delta == 1 & eta2 == 0] <- 0
+  Y2[delta == 1 & eta2 == 1] <- exp(logT2)
+  
+  # fit dWSurv
+  mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
+  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  
+  # simulate large dataset according to different treatment allocation
+  n_large <- 10000
+  ok <- TRUE
+  while(ok){
+    X1 <- runif(n_large, 0.1, 1.29)
+    X14 <- X1^4
+    X2 <- runif(n_large, 0.9, 2)
+    X23 <- X2^3
+    eta2 <- rbinom(n_large, 1, prob = 0.8)
+    
+    # fixed00
+    A1 <- A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed00 <- logT
+    
+    # fixed11
+    A1 <- A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed11 <- logT
+    
+    # fixed01
+    A1 <- rep(0, n_large)
+    A2 <- rep(1, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed01 <- logT
+    
+    # fixed10
+    A1 <- rep(1, n_large)
+    A2 <- rep(0, n_large)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    fixed10 <- logT
+    
+    # true optimal
+    A1 <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
+    A2 <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    optimal <- logT
+    
+    # dWSurv optimal
+    A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
+    A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
+    logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
+    A2opt <- ifelse(theta2[4] + theta2[5]*X2[eta2 == 1] > 0, 1, 0)
+    logT2opt <- logT2 + (A2opt - A2[eta2 == 1])*(theta2[4] + theta2[5]*X2[eta2 == 1])
+    logT <- theta1[1] + theta1[2]*X1 + theta1[3]*X14 + theta1[4]*A1 + theta1[5]*A1*X1 + rnorm(n_large, sd = 0.3)
+    T1 <- exp(logT[eta2 == 1]) - exp(logT2opt)
+    if(min(T1) <= 0) next
+    dWSurv_opt <- logT
+    
+    ok <- FALSE
+  }
+  res <- as.data.frame(cbind(optimal, dWSurv_opt, fixed00, fixed01, fixed10, fixed11))
+  name <- paste(mainpath, "Comparison_survival_time/Results/X1X2dep60_", n, ".txt", sep = "")
+  write.table(res, file = name)
+}
+
+
+
+

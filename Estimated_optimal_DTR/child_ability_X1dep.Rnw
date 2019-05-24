@@ -1,0 +1,74 @@
+<<parent_ability_X1dep, echo=FALSE, cache=FALSE>>=
+knitr::set_parent("C:/Users/Gabrielle/Google Drive/McGill - PhD/Thesis/dw-SM/JASA/Supplementary Material")
+@
+
+<<ab_X1dep, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE>>=
+library(hydroGOF)
+options(scipen = -1, digits = 2)
+
+mainpath <- "C:/Users/Gabrielle/Google Drive/McGill - PhD/Thesis/dw-SM/JASA/Supplementary Material/Reproduce_simulations_results/Estimated_optimal_DTR/"
+secpath <- "Results"
+setwd(paste(mainpath, secpath, sep = ""))
+
+# first column: % correctly identified optimal treatment in stage 1
+# second column: % correctly identified optimal treatment in stage 1
+# third column: % correctly identified optimal DTR stages 1 & 2
+dWSurv_dep30_500 <- read.table("1_dWSurvDep30_500.txt")
+dWSurv_dep30_1000 <- read.table("1_dWSurvDep30_1000.txt")
+dWSurv_dep30_10000 <- read.table("1_dWSurvDep30_10000.txt")
+dWSurv_dep60_500 <- read.table("1_dWSurvDep60_500.txt")
+dWSurv_dep60_1000 <- read.table("1_dWSurvDep60_1000.txt")
+dWSurv_dep60_10000 <- read.table("1_dWSurvDep60_10000.txt")
+
+HNW_dep30_500 <- read.table("1_HuangDep30_500.txt")
+HNW_dep30_1000 <- read.table("1_HuangDep30_1000.txt")
+HNW_dep30_10000 <- read.table("1_HuangDep30_10000.txt")
+HNW_dep60_500 <- read.table("1_HuangDep60_500.txt")
+HNW_dep60_1000 <- read.table("1_HuangDep60_1000.txt")
+HNW_dep60_10000 <- read.table("1_HuangDep60_10000.txt")
+@
+
+\begin{table}[H]
+\centering
+\caption{Ability to identify the optimal DTR with dWSurv and the method by HNW when all models are correctly specified with censoring dependent on baseline covariates.}
+{\tabcolsep=4.25pt
+\begin{tabular}{@{}llcrrrrcrrrrcrrrr@{}}
+\toprule
+& && \multicolumn{14}{c}{\% correctly identified}\\
+& && \multicolumn{4}{c}{stage 1} && \multicolumn{4}{c}{stage 2} && \multicolumn{4}{c}{stages 1 \& 2} \\
+\cmidrule{4-7}\cmidrule{9-12}\cmidrule{14-17}
+&  && Min & Mean & Med. & Max && Min & Mean & Med. & Max && Min & Mean & Med. & Max \\
+\midrule
+\multicolumn{14}{l}{30\% baseline dependent censoring}\\
+\rowcolor{Gray}
+\multirow{2}{*}{\cellcolor{white}~~n=500} & dWSurv && \Sexpr{min(dWSurv_dep30_500[,1], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep30_500[,1], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep30_500[,1], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep30_500[,1], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep30_500[,2], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep30_500[,2], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep30_500[,2], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep30_500[,2], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep30_500[,3], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep30_500[,3], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep30_500[,3], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep30_500[,3], na.rm = TRUE)}\\
+
+& HNW && \Sexpr{min(HNW_dep30_500[,1], na.rm = TRUE)} & \Sexpr{mean(HNW_dep30_500[,1], na.rm = TRUE)} & \Sexpr{median(HNW_dep30_500[,1], na.rm = TRUE)} & \Sexpr{max(HNW_dep30_500[,1], na.rm = TRUE)} && \Sexpr{min(HNW_dep30_500[,2], na.rm = TRUE)} & \Sexpr{mean(HNW_dep30_500[,2], na.rm = TRUE)} & \Sexpr{median(HNW_dep30_500[,2], na.rm = TRUE)} & \Sexpr{max(HNW_dep30_500[,2], na.rm = TRUE)} && \Sexpr{min(HNW_dep30_500[,3], na.rm = TRUE)} & \Sexpr{mean(HNW_dep30_500[,3], na.rm = TRUE)} & \Sexpr{median(HNW_dep30_500[,3], na.rm = TRUE)} & \Sexpr{max(HNW_dep30_500[,3], na.rm = TRUE)}\\
+
+\rowcolor{Gray}
+\multirow{2}{*}{\cellcolor{white}~~n=1000} & dWSurv && \Sexpr{min(dWSurv_dep30_1000[,1], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep30_1000[,1], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep30_1000[,1], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep30_1000[,1], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep30_1000[,2], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep30_1000[,2], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep30_1000[,2], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep30_1000[,2], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep30_1000[,3], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep30_1000[,3], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep30_1000[,3], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep30_1000[,3], na.rm = TRUE)}\\
+
+& HNW && \Sexpr{min(HNW_dep30_1000[,1], na.rm = TRUE)} & \Sexpr{mean(HNW_dep30_1000[,1], na.rm = TRUE)} & \Sexpr{median(HNW_dep30_1000[,1], na.rm = TRUE)} & \Sexpr{max(HNW_dep30_1000[,1], na.rm = TRUE)} && \Sexpr{min(HNW_dep30_1000[,2], na.rm = TRUE)} & \Sexpr{mean(HNW_dep30_1000[,2], na.rm = TRUE)} & \Sexpr{median(HNW_dep30_1000[,2], na.rm = TRUE)} & \Sexpr{max(HNW_dep30_1000[,2], na.rm = TRUE)} && \Sexpr{min(HNW_dep30_1000[,3], na.rm = TRUE)} & \Sexpr{mean(HNW_dep30_1000[,3], na.rm = TRUE)} & \Sexpr{median(HNW_dep30_1000[,3], na.rm = TRUE)} & \Sexpr{max(HNW_dep30_1000[,3], na.rm = TRUE)}\\
+
+\rowcolor{Gray}
+\multirow{2}{*}{\cellcolor{white}~~n=10000} & dWSurv && \Sexpr{min(dWSurv_dep30_10000[,1], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep30_10000[,1], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep30_10000[,1], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep30_10000[,1], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep30_10000[,2], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep30_10000[,2], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep30_10000[,2], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep30_10000[,2], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep30_10000[,3], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep30_10000[,3], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep30_10000[,3], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep30_10000[,3], na.rm = TRUE)}\\
+& HNW && \Sexpr{min(HNW_dep30_10000[,1], na.rm = TRUE)} & \Sexpr{mean(HNW_dep30_10000[,1], na.rm = TRUE)} & \Sexpr{median(HNW_dep30_10000[,1], na.rm = TRUE)} & \Sexpr{max(HNW_dep30_10000[,1], na.rm = TRUE)} && \Sexpr{min(HNW_dep30_10000[,2], na.rm = TRUE)} & \Sexpr{mean(HNW_dep30_10000[,2], na.rm = TRUE)} & \Sexpr{median(HNW_dep30_10000[,2], na.rm = TRUE)} & \Sexpr{max(HNW_dep30_10000[,2], na.rm = TRUE)} && \Sexpr{min(HNW_dep30_10000[,3], na.rm = TRUE)} & \Sexpr{mean(HNW_dep30_10000[,3], na.rm = TRUE)} & \Sexpr{median(HNW_dep30_10000[,3], na.rm = TRUE)} & \Sexpr{max(HNW_dep30_10000[,3], na.rm = TRUE)}\\
+
+
+\multicolumn{14}{l}{60\% baseline dependent censoring}\\
+\rowcolor{Gray}
+\multirow{2}{*}{\cellcolor{white}~~n=500} & dWSurv && \Sexpr{min(dWSurv_dep60_500[,1], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep60_500[,1], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep60_500[,1], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep60_500[,1], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep60_500[,2], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep60_500[,2], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep60_500[,2], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep60_500[,2], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep60_500[,3], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep60_500[,3], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep60_500[,3], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep60_500[,3], na.rm = TRUE)}\\
+
+& HNW && \Sexpr{min(HNW_dep60_500[,1], na.rm = TRUE)} & \Sexpr{mean(HNW_dep60_500[,1], na.rm = TRUE)} & \Sexpr{median(HNW_dep60_500[,1], na.rm = TRUE)} & \Sexpr{max(HNW_dep60_500[,1], na.rm = TRUE)} && \Sexpr{min(HNW_dep60_500[,2], na.rm = TRUE)} & \Sexpr{mean(HNW_dep60_500[,2], na.rm = TRUE)} & \Sexpr{median(HNW_dep60_500[,2], na.rm = TRUE)} & \Sexpr{max(HNW_dep60_500[,2], na.rm = TRUE)} && \Sexpr{min(HNW_dep60_500[,3], na.rm = TRUE)} & \Sexpr{mean(HNW_dep60_500[,3], na.rm = TRUE)} & \Sexpr{median(HNW_dep60_500[,3], na.rm = TRUE)} & \Sexpr{max(HNW_dep60_500[,3], na.rm = TRUE)}\\
+
+\rowcolor{Gray}
+\multirow{2}{*}{\cellcolor{white}~~n=1000} & dWSurv && \Sexpr{min(dWSurv_dep60_1000[,1], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep60_1000[,1], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep60_1000[,1], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep60_1000[,1], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep60_1000[,2], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep60_1000[,2], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep60_1000[,2], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep60_1000[,2], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep60_1000[,3], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep60_1000[,3], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep60_1000[,3], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep60_1000[,3], na.rm = TRUE)}\\
+
+& HNW && \Sexpr{min(HNW_dep60_1000[,1], na.rm = TRUE)} & \Sexpr{mean(HNW_dep60_1000[,1], na.rm = TRUE)} & \Sexpr{median(HNW_dep60_1000[,1], na.rm = TRUE)} & \Sexpr{max(HNW_dep60_1000[,1], na.rm = TRUE)} && \Sexpr{min(HNW_dep60_1000[,2], na.rm = TRUE)} & \Sexpr{mean(HNW_dep60_1000[,2], na.rm = TRUE)} & \Sexpr{median(HNW_dep60_1000[,2], na.rm = TRUE)} & \Sexpr{max(HNW_dep60_1000[,2], na.rm = TRUE)} && \Sexpr{min(HNW_dep60_1000[,3], na.rm = TRUE)} & \Sexpr{mean(HNW_dep60_1000[,3], na.rm = TRUE)} & \Sexpr{median(HNW_dep60_1000[,3], na.rm = TRUE)} & \Sexpr{max(HNW_dep60_1000[,3], na.rm = TRUE)}\\
+
+\rowcolor{Gray}
+\multirow{2}{*}{\cellcolor{white}~~n=10000} & dWSurv && \Sexpr{min(dWSurv_dep60_10000[,1], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep60_10000[,1], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep60_10000[,1], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep60_10000[,1], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep60_10000[,2], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep60_10000[,2], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep60_10000[,2], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep60_10000[,2], na.rm = TRUE)} && \Sexpr{min(dWSurv_dep60_10000[,3], na.rm = TRUE)} & \Sexpr{mean(dWSurv_dep60_10000[,3], na.rm = TRUE)} & \Sexpr{median(dWSurv_dep60_10000[,3], na.rm = TRUE)} & \Sexpr{max(dWSurv_dep60_10000[,3], na.rm = TRUE)}\\
+& HNW && \Sexpr{min(HNW_dep60_10000[,1], na.rm = TRUE)} & \Sexpr{mean(HNW_dep60_10000[,1], na.rm = TRUE)} & \Sexpr{median(HNW_dep60_10000[,1], na.rm = TRUE)} & \Sexpr{max(HNW_dep60_10000[,1], na.rm = TRUE)} && \Sexpr{min(HNW_dep60_10000[,2], na.rm = TRUE)} & \Sexpr{mean(HNW_dep60_10000[,2], na.rm = TRUE)} & \Sexpr{median(HNW_dep60_10000[,2], na.rm = TRUE)} & \Sexpr{max(HNW_dep60_10000[,2], na.rm = TRUE)} && \Sexpr{min(HNW_dep60_10000[,3], na.rm = TRUE)} & \Sexpr{mean(HNW_dep60_10000[,3], na.rm = TRUE)} & \Sexpr{median(HNW_dep60_10000[,3], na.rm = TRUE)} & \Sexpr{max(HNW_dep60_10000[,3], na.rm = TRUE)}\\
+\bottomrule
+\end{tabular}}
+\end{table}
