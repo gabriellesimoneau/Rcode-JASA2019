@@ -15,8 +15,8 @@
 ###########################################################################
 
 library(ggplot2)
-# mainpath refers to the location of the folder 'Reproduce_simulations_results'
-mainpath <- "C:/Users/Gabrielle/Google Drive/McGill - PhD/Thesis/dw-SM/JASA/Supplementary Material/Reproduce_simulations_results/"
+# mainpath: location of the folder "Reproduce_simulations_results"
+mainpath <- ""
 secpath <- "Comparison_survival_time/Results/"
 setwd(paste(mainpath, secpath, sep = ""))
 

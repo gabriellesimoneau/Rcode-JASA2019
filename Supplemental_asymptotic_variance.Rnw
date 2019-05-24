@@ -1,0 +1,56 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\newcommand{\norme}[1]{\left\Vert #1\right\Vert}
+\usepackage{breqn}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{pdflscape}
+\usepackage{afterpage}
+\usepackage{multirow} %multicolumn
+\usepackage{xcolor}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[pagebackref=true,bookmarks]{hyperref}
+\usepackage{tikz}
+\usepackage{natbib}
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+\usepackage{wrapfig}
+\usepackage{pdflscape}
+\usepackage{rotating}
+\usepackage{colortbl}
+
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+
+\usepackage{xcolor}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+<<echo=FALSE>>=
+options(width=60)
+opts_knit$set(self.contained=FALSE)
+@
+
+\usepackage{capt-of}
+
+\begin{document}
+\begin{center}
+{\LARGE{Reproduce tables and figures in supplementary material ``asymptotic variance formulae" for ``Estimating Optimal Dynamic Treatment Regimes With Survival Outcomes'}}
+\end{center}
+
+<<asymptotic_indep, child='Reproduce_simulations_results/Asymptotic_variance/child_asymp_indep.Rnw'>>=
+@
+
+<<asymptotic_dep, child='Reproduce_simulations_results/Asymptotic_variance/child_asymp_dep.Rnw'>>=
+@
+
+<<asymptotic_X1X2dep, child='Reproduce_simulations_results/Asymptotic_variance/child_asymp_X1X2dep.Rnw'>>=
+@
+
+\end{document}

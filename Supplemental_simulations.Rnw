@@ -1,0 +1,462 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\newcommand{\norme}[1]{\left\Vert #1\right\Vert}
+\usepackage{breqn}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{pdflscape}
+\usepackage{afterpage}
+\usepackage{multirow} %multicolumn
+\usepackage{xcolor}
+\usepackage[margin=0.8in]{geometry}
+\usepackage[pagebackref=true,bookmarks]{hyperref}
+\usepackage{tikz}
+\usepackage{natbib}
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+\usepackage{wrapfig}
+\usepackage{pdflscape}
+\usepackage{rotating}
+\usepackage{colortbl}
+
+\definecolor{Gray}{gray}{0.9}
+
+\usepackage{xcolor}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+<<echo=FALSE>>=
+options(width=60)
+opts_knit$set(self.contained=FALSE)
+# mainpath is the location of the folder 'Reproduce_simulation_results"
+mainpath <- ""
+@
+
+\usepackage{capt-of}
+
+\begin{document}
+\begin{center}
+{\LARGE{Reproduce tables and figures in Supplementary material ``details on the simulation study" for ``Estimating Optimal Dynamic Treatment Regimes With Survival Outcomes"}}
+\end{center}
+
+\begin{table}[H]
+\centering
+{\tabcolsep=4.25pt{
+\begin{tabular}{@{}lllccc@{}}
+\toprule
+& && \multicolumn{3}{c}{Censoring dependency} \\
+\cmidrule{3-6}
+\% censoring & $n$ && Independent & Dependent (baseline) & Dependent (time-varying) \\
+\hline
+\multirow{6}{*}{Low (30\%)} & \multirow{2}{*}{500} && \hyperlink{link_table:indep30_500}{Table \ref*{table:indep30_500}} & \hyperlink{link_table:dep30_500}{Table \ref*{table:dep30_500}} & \hyperlink{link_table:X2dep30_500}{Table \ref*{table:X2dep30_500}}\\
+
+&&& \hyperlink{link_figure:indep30_500}{Figure \ref*{figure:indep30_500}} & \hyperlink{link_figure:dep30_500}{Figure \ref*{figure:dep30_500}} & \hyperlink{link_figure:X2dep30_500}{Figure \ref*{figure:X2dep30_500}}\\
+
+\cmidrule{2-6}
+
+& \multirow{2}{*}{1000} && \hyperlink{link_table:indep30_1000}{Table \ref*{table:indep30_1000}} & \hyperlink{link_table:dep30_1000}{Table \ref*{table:dep30_1000}} & \hyperlink{link_table:X2dep30_1000}{Table \ref*{table:X2dep30_1000}}\\
+
+&&& Figure 1 (paper) & \hyperlink{link_figure:dep30_1000}{Figure \ref*{figure:dep30_1000}} & \hyperlink{link_figure:X2dep30_1000}{Figure \ref*{figure:X2dep30_1000}}\\
+
+\cmidrule{2-6}
+
+& \multirow{2}{*}{10,000} && \hyperlink{link_table:indep30_10000}{Table \ref*{table:indep30_10000}} & \hyperlink{link_table:dep30_10000}{Table \ref*{table:dep30_10000}} & \hyperlink{link_table:X2dep30_10000}{Table \ref*{table:X2dep30_10000}} \\
+
+&&& \hyperlink{link_figure:indep30_10000}{Figure \ref*{figure:indep30_10000}} & \hyperlink{link_figure:dep30_10000}{Figure \ref*{figure:dep30_10000}} & \hyperlink{link_figure:X2dep30_10000}{Figure \ref*{figure:X2dep30_10000}}\\
+
+\hline
+\multirow{6}{*}{High (60\%)} & \multirow{2}{*}{500} && \hyperlink{link_table:indep60_500}{Table \ref*{table:indep60_500}} & \hyperlink{link_table:dep60_500}{Table \ref*{table:dep60_500}} & \hyperlink{link_table:X2dep60_500}{Table \ref*{table:X2dep60_500}}\\
+
+&&& \hyperlink{link_figure:indep60_500}{Figure \ref*{figure:indep60_500}} & \hyperlink{link_figure:dep60_500}{Figure \ref*{figure:dep60_500}} & \hyperlink{link_figure:X2dep60_500}{Figure \ref*{figure:X2dep60_500}}\\
+
+\cmidrule{2-6}
+
+& \multirow{2}{*}{1000} && \hyperlink{link_table:indep60_1000}{Table \ref*{table:indep60_1000}} & \hyperlink{link_table:dep60_1000}{Table \ref*{table:dep60_1000}} & \hyperlink{link_table:X2dep60_1000}{Table \ref*{table:X2dep60_1000}}\\
+
+&&& \hyperlink{link_figure:indep60_1000}{Figure \ref*{figure:indep60_1000}} & \hyperlink{link_figure:dep60_1000}{Figure \ref*{figure:dep60_1000}} & \hyperlink{link_figure:X2dep60_1000}{Figure \ref*{figure:X2dep60_1000}}\\
+
+\cmidrule{2-6}
+
+& \multirow{2}{*}{10,000} && \hyperlink{link_table:indep60_10000}{Table \ref*{table:indep60_10000}} & \hyperlink{link_table:dep60_10000}{Table \ref*{table:dep60_10000}} & \hyperlink{link_table:X2dep60_10000}{Table \ref*{table:X2dep60_10000}}\\
+
+&&& \hyperlink{link_figure:indep60_10000}{Figure \ref*{figure:indep60_10000}} & \hyperlink{link_figure:dep60_10000}{Figure \ref*{figure:dep60_10000}} & \hyperlink{link_figure:X2dep60_10000}{Figure \ref*{figure:X2dep60_10000}}\\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\subsection{With independent censoring}
+% 30% independent censoring, n = 1000
+In the paper, Figure 1 illustrates the consistency and double-robustness of DWSurv with 30\% independent censoring and $n$=1000. Table 2 complements Figure 1 in the paper.
+\pagebreak
+\hypertarget{link_table:indep30_1000}{{\color{white} anchor}}
+<<indep30_1000, child='Reproduce_simulations_results/Bias_precision/child_indep30_1000.Rnw'>>=
+@
+
+\pagebreak
+\hypertarget{link_figure:indep30_500}{{\color{white} anchor}}
+% 30% independent censoring, n = 500
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_indep30_n500.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=500 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 30\% censoring, with both the probability of censoring and the censoring times independent of the survival times.\label{figure:indep30_500}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:indep30_500}{{\color{white} anchor}}
+<<indep30_500, child='Reproduce_simulations_results/Bias_precision/child_indep30_500.Rnw'>>=
+@
+
+% 30% independent censoring, n = 10000
+\pagebreak
+\hypertarget{link_figure:indep30_10000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_indep30_n10000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=10,000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 30\% censoring, with both the probability of censoring and the censoring times independent of the survival times.\label{figure:indep30_10000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:indep30_10000}{{\color{white} anchor}}
+<<indep30_10000, child='Reproduce_simulations_results/Bias_precision/child_indep30_10000.Rnw'>>=
+@
+
+\pagebreak
+\hypertarget{link_figure:indep60_500}{{\color{white} anchor}}
+% 60% independent censoring, n = 500
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_indep60_n500.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=500 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 60\% censoring, with both the probability of censoring and the censoring times independent of the survival times.\label{figure:indep60_500}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:indep60_500}{{\color{white} anchor}}
+<<indep60_500, child='Reproduce_simulations_results/Bias_precision/child_indep60_500.Rnw'>>=
+@
+
+% 60% independent censoring, n = 1000
+\pagebreak
+\hypertarget{link_figure:indep60_1000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_indep60_n1000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=1000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 60\% censoring, with both the probability of censoring and the censoring times independent of the survival times.\label{figure:indep60_1000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:indep60_1000}{{\color{white} anchor}}
+<<indep60_1000, child='Reproduce_simulations_results/Bias_precision/child_indep60_1000.Rnw'>>=
+@
+
+% 60% independent censoring, n = 10000
+\pagebreak
+\hypertarget{link_figure:indep60_10000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_indep60_n10000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=10,000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 60\% censoring, with both the probability of censoring and the censoring times independent of the survival times.\label{figure:indep60_10000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:indep60_10000}{{\color{white} anchor}}
+<<indep60_10000, child='Reproduce_simulations_results/Bias_precision/child_indep60_10000.Rnw'>>=
+@
+
+
+
+\subsection{With censoring dependent on baseline covariates}
+% 30% dependent censoring (baseline), n = 500
+\hypertarget{link_figure:dep30_500}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_dep30_n500.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=500 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 30\% censoring, with both the probability of censoring and the censoring times conditionnally independent of the survival times given baseline covariates.\label{figure:dep30_500}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:dep30_500}{{\color{white} anchor}}
+<<dep30_500, child='Reproduce_simulations_results/Bias_precision/child_dep30_500.Rnw'>>=
+@
+
+% 30% dependent censoring (baseline), n = 1000
+\pagebreak
+\hypertarget{link_figure:dep30_1000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_dep30_n1000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=1000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 30\% censoring, with both the probability of censoring and the censoring times conditionnally independent of the survival times given baseline covariates.\label{figure:dep30_1000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:dep30_1000}{{\color{white} anchor}}
+<<dep30_1000, child='Reproduce_simulations_results/Bias_precision/child_dep30_1000.Rnw'>>=
+@
+
+% 30% dependent censoring (baseline), n = 10000
+\pagebreak
+\hypertarget{link_figure:dep30_10000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_dep30_n10000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=10,000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 30\% censoring, with both the probability of censoring and the censoring times conditionnally independent of the survival times given baseline covariates.\label{figure:dep30_10000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:dep30_10000}{{\color{white} anchor}}
+<<dep30_10000, child='Reproduce_simulations_results/Bias_precision/child_dep30_10000.Rnw'>>=
+@
+
+% 60% dependent censoring (baseline), n = 500
+\pagebreak
+\hypertarget{link_figure:dep60_500}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_dep60_n500.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=500 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 60\% censoring, with both the probability of censoring and the censoring times conditionnally independent of the survival times given baseline covariates.\label{figure:dep60_500}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:dep60_500}{{\color{white} anchor}}
+<<dep60_500, child='Reproduce_simulations_results/Bias_precision/child_dep60_500.Rnw'>>=
+@
+
+% 60% dependent censoring (baseline), n = 1000
+\pagebreak
+\hypertarget{link_figure:dep60_1000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_dep60_n1000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=1000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 60\% censoring, with both the probability of censoring and the censoring times conditionnally independent of the survival times given baseline covariates.\label{figure:dep60_1000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:dep60_1000}{{\color{white} anchor}}
+<<dep60_1000, child='Reproduce_simulations_results/Bias_precision/child_dep60_1000.Rnw'>>=
+@
+
+% 60% dependent censoring (baseline), n = 10000
+\pagebreak
+\hypertarget{link_figure:dep60_10000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_dep60_n10000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv (dark grey) and the method by HNW (light grey) with sample size $n$=10,000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 60\% censoring, with both the probability of censoring and the censoring times conditionnally independent of the survival times given baseline covariates.\label{figure:dep60_10000}}
+\end{figure}
+
+\newpage
+\hypertarget{link_table:dep60_10000}{{\color{white} anchor}}
+<<dep60_10000, child='Reproduce_simulations_results/Bias_precision/child_dep60_10000.Rnw'>>=
+@
+
+
+\subsection{With censoring dependent on time-varying covariates}
+
+% 30% time-varying dependent censoring, n = 500
+\hypertarget{link_figure:X2dep30_500}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_X1X2dep30_n500.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv with sample size $n$=500 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 30\% censoring, with both the probability of censoring dependent on time-varying covariates.\label{figure:X2dep30_500}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:X2dep30_500}{{\color{white} anchor}}
+<<X1X2dep30_500, child='Reproduce_simulations_results/Bias_precision/child_X1X2dep30_500.Rnw'>>=
+@
+
+% 30% time-varying dependent censoring, n = 1000
+\pagebreak
+\hypertarget{link_figure:X2dep30_1000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_X1X2dep30_n1000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv with sample size $n$=1000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 30\% censoring, with the probability of censoring dependent on time-varying covariates.\label{figure:X2dep30_1000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:X2dep30_1000}{{\color{white} anchor}}
+<<X1X2dep30_1000, child='Reproduce_simulations_results/Bias_precision/child_X1X2dep30_1000.Rnw'>>=
+@
+
+% 30% time-varying dependent censoring, n = 10000
+\pagebreak
+\hypertarget{link_figure:X2dep30_10000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_X1X2dep30_n10000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv with sample size $n$=10,000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 30\% censoring, with the probability of censoring dependent on time-varying covariates.\label{figure:X2dep30_10000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:X2dep30_10000}{{\color{white} anchor}}
+<<X1X2dep30_10000, child='Reproduce_simulations_results/Bias_precision/child_X1X2dep30_10000.Rnw'>>=
+@
+
+% 60% time-varying dependent censoring, n = 500
+\pagebreak
+\hypertarget{link_figure:X2dep60_500}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_X1X2dep60_n500.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv with sample size $n$=500 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 60\% censoring, with both the probability of censoring dependent on time-varying covariates.\label{figure:X2dep60_500}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:X2dep60_500}{{\color{white} anchor}}
+<<X1X2dep60_500, child='Reproduce_simulations_results/Bias_precision/child_X1X2dep60_500.Rnw'>>=
+@
+
+% 60% time-varying dependent censoring, n = 1000
+\pagebreak
+\hypertarget{link_figure:X2dep60_1000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_X1X2dep60_n1000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv with sample size $n$=1000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 60\% censoring, with the probability of censoring dependent on time-varying covariates.\label{figure:X2dep60_1000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:X2dep60_1000}{{\color{white} anchor}}
+<<X1X2dep60_1000, child='Reproduce_simulations_results/Bias_precision/child_X1X2dep60_1000.Rnw'>>=
+@
+
+% 60% time-varying dependent censoring, n = 10000
+\pagebreak
+\hypertarget{link_figure:X2dep60_10000}{{\color{white} anchor}}
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Bias_precision/Bias_precision_X1X2dep60_n10000.png}
+\caption{Distribution of the blip parameter estimates in the first stage (upper row) and second stage (lower row) with DWSurv with sample size $n$=10,000 across four scenarios: (1)  all the models correctly specified, (2) weight models misspecified but treatment-free model correctly specified, (3) treatment-free model misspecified but weight models correctly specified, and (4) all models incorrectly specified. The data were simulated with 60\% censoring, with the probability of censoring dependent on time-varying covariates.\label{figure:X2dep60_10000}}
+\end{figure}
+
+\pagebreak
+\hypertarget{link_table:X2dep60_10000}{{\color{white} anchor}}
+<<X1X2dep60_10000, child='Reproduce_simulations_results/Bias_precision/child_X1X2dep60_10000.Rnw'>>=
+@
+
+\pagebreak
+
+<<ability_indep, child='Reproduce_simulations_results/Estimated_optimal_DTR/child_ability_indep.Rnw'>>=
+@
+
+<<ability_X1dep, child='Reproduce_simulations_results/Estimated_optimal_DTR/child_ability_X1dep.Rnw'>>=
+@
+
+<<ability_X1X2dep, child='Reproduce_simulations_results/Estimated_optimal_DTR/child_ability_X1X2dep.Rnw'>>=
+@
+\pagebreak
+
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Comparison_survival_time/compare_indep30.png}
+\caption{Distribution of the log-survival times in a large sample (n=10,000) with treatment assignment following the true optimal DTR, the optimal DTR estimated by DWSurv, the optimal DTR estimated by HNW, and the four fixed treatment strategies. For the two schemes relying on the estimation of the optimal DTR by DWSurv or HNW, initial sample sizes of 500 (white) or 1000 (grey) were used. For the other schemes, it is meaningless to specify an initial sample size as the strategies are determined by the data-generating mechanism or decided \textit{a priori}. Data were generated with 30\% independent censoring.}
+\end{figure}
+
+<<compare_indep30, child='Reproduce_simulations_results/Comparison_survival_time/child_compare_indep30.Rnw'>>=
+@
+
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Comparison_survival_time/compare_indep60.png}
+\caption{Distribution of the log-survival times in a large sample (n=10,000) with treatment assignment following the true optimal DTR, the optimal DTR estimated by DWSurv, the optimal DTR estimated by HNW, and the four fixed treatment strategies. For the two schemes relying on the estimation of the optimal DTR by DWSurv or HNW, initial sample sizes of 500 (white) or 1000 (grey) were used. For the other schemes, it is meaningless to specify an initial sample size as the strategies are determined by the data-generating mechanism or decided \textit{a priori}. Data were generated with 60\% independent censoring.}
+\end{figure}
+
+<<compare_indep60, child='Reproduce_simulations_results/Comparison_survival_time/child_compare_indep60.Rnw'>>=
+@
+
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Comparison_survival_time/compare_X1dep30.png}
+\caption{Distribution of the log-survival times in a large sample (n=10,000) with treatment assignment following the true optimal DTR, the optimal DTR estimated by DWSurv, the optimal DTR estimated by HNW, and the four fixed treatment strategies. For the two schemes relying on the estimation of the optimal DTR by DWSurv or HNW, initial sample sizes of 500 (white) or 1000 (grey) were used. For the other schemes, it is meaningless to specify an initial sample size as the strategies are determined by the data-generating mechanism or decided \textit{a priori}. Data were generated with 30\% dependent on baseline covariates.}
+\end{figure}
+
+<<compare_dep30, child='Reproduce_simulations_results/Comparison_survival_time/child_compare_dep30.Rnw'>>=
+@
+
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Comparison_survival_time/compare_X1dep60.png}
+\caption{Distribution of the log-survival times in a large sample (n=10,000) with treatment assignment following the true optimal DTR, the optimal DTR estimated by DWSurv, the optimal DTR estimated by HNW, and the four fixed treatment strategies. For the two schemes relying on the estimation of the optimal DTR by DWSurv or HNW, initial sample sizes of 500 (white) or 1000 (grey) were used. For the other schemes, it is meaningless to specify an initial sample size as the strategies are determined by the data-generating mechanism or decided \textit{a priori}. Data were generated with 60\% censoring dependent on baseline covariates.}
+\end{figure}
+
+<<compare_dep60, child='Reproduce_simulations_results/Comparison_survival_time/child_compare_dep60.Rnw'>>=
+@
+
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Comparison_survival_time/compare_X1X2dep30.png}
+\caption{Distribution of the log-survival times in a large sample (n=10,000) with treatment assignment following the true optimal DTR, the optimal DTR estimated by DWSurv, the optimal DTR estimated by HNW, and the four fixed treatment strategies. For the two schemes relying on the estimation of the optimal DTR by DWSurv or HNW, initial sample sizes of 500 (white) or 1000 (grey) were used. For the other schemes, it is meaningless to specify an initial sample size as the strategies are determined by the data-generating mechanism or decided \textit{a priori}. Data were generated with 30\% dependent on time-varying covariates.}
+\end{figure}
+
+<<compare_X1X2dep30, child='Reproduce_simulations_results/Comparison_survival_time/child_compare_X1X2dep30.Rnw'>>=
+@
+
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Comparison_survival_time/compare_X1X2dep60.png}
+\caption{Distribution of the log-survival times in a large sample (n=10,000) with treatment assignment following the true optimal DTR, the optimal DTR estimated by DWSurv, the optimal DTR estimated by HNW, and the four fixed treatment strategies. For the two schemes relying on the estimation of the optimal DTR by DWSurv or HNW, initial sample sizes of 500 (white) or 1000 (grey) were used. For the other schemes, it is meaningless to specify an initial sample size as the strategies are determined by the data-generating mechanism or decided \textit{a priori}. Data were generated with 60\% censoring dependent on time-varying covariates.}
+\end{figure}
+
+<<compare_X1X2dep60, child='Reproduce_simulations_results/Comparison_survival_time/child_compare_X1X2dep60.Rnw'>>=
+@
+
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Comparison_value_search/dwsurv_dmsm1.png}
+\caption{Distribution of A) the mean log-survival time under optimal treatment and B) the estimate for $\theta$ across 1000 simulated datasets with three sample sizes with dynamic MSM and DWSurv with true blip parameters $(\psi_1,\psi_2)=(-0.8,0.9)$. The horizontal line represents the true value of $\theta$. Data were generated in a single-stage setting with 30\% censoring dependent on a baseline covariate.\label{fig:dmsm_dwsurv1}}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[width = 1\textwidth]{Reproduce_simulations_results/Comparison_value_search/dwsurv_dmsm2.png}
+\caption{Distribution of A) the mean log-survival time under optimal treatment and B) the estimate for $\theta$ across 1000 simulated datasets with three sample sizes with dynamic MSM and DWSurv with true blip parameters $(\psi_1,\psi_2)=(-0.15,0.2)$. The boxplots B) are truncated. The horizontal line represents the true value of $\theta$. Data were generated in a single-stage setting with 30\% censoring dependent on a baseline covariate.\label{fig:dmsm_dwsurv2}}
+\end{figure}
+
+<<load_comparison_RData, eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE>>=
+library(hydroGOF)
+options(scipen = -1, digits = 2)
+load(paste(mainpath, "comparison_value_search/comparison_dmsm_dwsurv.RData", sep = ""))
+dmsm1 <- fplot1[which(fplot1$Method == "DynamicMSM" & fplot1$n == "n=500"),]
+dmsm2 <- fplot1[which(fplot1$Method == "DynamicMSM" & fplot1$n == "n=1000"),]
+dmsm3 <- fplot1[which(fplot1$Method == "DynamicMSM" & fplot1$n == "n=5000"),]
+dsurv1 <- fplot1[which(fplot1$Method == "DWSurv" & fplot1$n == "n=500"),]
+dsurv2 <- fplot1[which(fplot1$Method == "DWSurv" & fplot1$n == "n=1000"),]
+dsurv3 <- fplot1[which(fplot1$Method == "DWSurv" & fplot1$n == "n=5000"),]
+@
+\begin{table}[H]
+\centering
+\caption{Distribution of $\hat\theta$ with DWSurv and dynamic MSM when $\theta=0.8/0.9$}\label{table:dmsm_dwsurv1}
+{\tabcolsep=4.25pt
+\resizebox{\textwidth}{!}{
+\begin{tabular}{@{}llccccccccc@{}}
+\toprule
+ & Method && Min. & Q1 & Median & Mean (SE) & Q3 & Max. & Bias & RMSE \\
+\hline
+\multicolumn{2}{l}{$n=500$} &&  &  & &  & & & & \\
+& Dynamic MSM && \Sexpr{min(dmsm1[,2])} & \Sexpr{quantile(dmsm1[,2])[2]} & \Sexpr{quantile(dmsm1[,2])[3]} & \Sexpr{mean(dmsm1[,2])} (\Sexpr{sd(dmsm1[,2])}) & \Sexpr{quantile(dmsm1[,2])[4]} & \Sexpr{max(dmsm1[,2])} & \Sexpr{mean(dmsm1[,2])-0.8/0.9} & \Sexpr{rmse(rep(mean(dmsm1[,2]),1000), dmsm1[,2])}\\
+& DWSurv && \Sexpr{min(dsurv1[,2])} & \Sexpr{quantile(dsurv1[,2])[2]} & \Sexpr{quantile(dsurv1[,2])[3]} & \Sexpr{mean(dsurv1[,2])} (\Sexpr{sd(dsurv1[,2])}) & \Sexpr{quantile(dsurv1[,2])[4]} & \Sexpr{max(dsurv1[,2])} & \Sexpr{mean(dsurv1[,2])-0.8/0.9} & \Sexpr{rmse(rep(mean(dsurv1[,2]),1000), dsurv1[,2])}\\
+\multicolumn{2}{l}{$n=1000$} &&  &  & &  & & & & \\
+& Dynamic MSM && \Sexpr{min(dmsm2[,2])} & \Sexpr{quantile(dmsm2[,2])[2]} & \Sexpr{quantile(dmsm2[,2])[3]} & \Sexpr{mean(dmsm2[,2])} (\Sexpr{sd(dmsm2[,2])}) & \Sexpr{quantile(dmsm2[,2])[4]} & \Sexpr{max(dmsm2[,2])} & \Sexpr{mean(dmsm2[,2])-0.8/0.9} & \Sexpr{rmse(rep(mean(dmsm2[,2]),1000), dmsm2[,2])}\\
+& DWSurv && \Sexpr{min(dsurv2[,2])} & \Sexpr{quantile(dsurv2[,2])[2]} & \Sexpr{quantile(dsurv2[,2])[3]} & \Sexpr{mean(dsurv2[,2])} (\Sexpr{sd(dsurv2[,2])}) & \Sexpr{quantile(dsurv2[,2])[4]} & \Sexpr{max(dsurv2[,2])} & \Sexpr{mean(dsurv2[,2])-0.8/0.9} & \Sexpr{rmse(rep(mean(dsurv2[,2]),1000), dsurv2[,2])}\\
+\multicolumn{2}{l}{$n=5000$} &&  &  & &  & & & & \\
+& Dynamic MSM && \Sexpr{min(dmsm3[,2])} & \Sexpr{quantile(dmsm3[,2])[2]} & \Sexpr{quantile(dmsm3[,2])[3]} & \Sexpr{mean(dmsm3[,2])} (\Sexpr{sd(dmsm3[,2])}) & \Sexpr{quantile(dmsm3[,2])[4]} & \Sexpr{max(dmsm3[,2])} & \Sexpr{mean(dmsm3[,2])-0.8/0.9} & \Sexpr{rmse(rep(mean(dmsm3[,2]),1000), dmsm3[,2])}\\
+& DWSurv && \Sexpr{min(dsurv3[,2])} & \Sexpr{quantile(dsurv3[,2])[2]} & \Sexpr{quantile(dsurv3[,2])[3]} & \Sexpr{mean(dsurv3[,2])} (\Sexpr{sd(dsurv3[,2])}) & \Sexpr{quantile(dsurv3[,2])[4]} & \Sexpr{max(dsurv3[,2])} & \Sexpr{mean(dsurv3[,2])-0.8/0.9} & \Sexpr{rmse(rep(mean(dsurv3[,2]),1000), dsurv3[,2])}\\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+<<load_comparison_2, eval = TRUE, echo = FALSE, message = FALSE, warning=FALSE>>=
+dmsm1 <- fplot2[which(fplot2$Method == "DynamicMSM" & fplot2$n == "n=500"),]
+dmsm2 <- fplot2[which(fplot2$Method == "DynamicMSM" & fplot2$n == "n=1000"),]
+dmsm3 <- fplot2[which(fplot2$Method == "DynamicMSM" & fplot2$n == "n=5000"),]
+dsurv1 <- fplot2[which(fplot2$Method == "DWSurv" & fplot2$n == "n=500"),]
+dsurv2 <- fplot2[which(fplot2$Method == "DWSurv" & fplot2$n == "n=1000"),]
+dsurv3 <- fplot2[which(fplot2$Method == "DWSurv" & fplot2$n == "n=5000"),]
+@
+
+\begin{table}[H]
+\centering
+\caption{Distribution of $\hat\theta$ with DWSurv and dynamic MSM when $\theta=0.75$}\label{table:dmsm_dwsurv2}
+{\tabcolsep=4.25pt
+\resizebox{\textwidth}{!}{
+\begin{tabular}{@{}llccccccccc@{}}
+\toprule
+ & Method && Min. & Q1 & Median & Mean (SE) & Q3 & Max. & Bias & RMSE \\
+\hline
+\multicolumn{2}{l}{$n=500$} &&  &  & &  & & & & \\
+& Dynamic MSM && \Sexpr{min(dmsm1[,2])} & \Sexpr{quantile(dmsm1[,2])[2]} & \Sexpr{quantile(dmsm1[,2])[3]} & \Sexpr{mean(dmsm1[,2])} (\Sexpr{sd(dmsm1[,2])}) & \Sexpr{quantile(dmsm1[,2])[4]} & \Sexpr{max(dmsm1[,2])} & \Sexpr{mean(dmsm1[,2])-0.75} & \Sexpr{rmse(rep(mean(dmsm1[,2]),1000), dmsm1[,2])}\\
+& DWSurv && \Sexpr{min(dsurv1[,2])} & \Sexpr{quantile(dsurv1[,2])[2]} & \Sexpr{quantile(dsurv1[,2])[3]} & \Sexpr{mean(dsurv1[,2])} (\Sexpr{sd(dsurv1[,2])}) & \Sexpr{quantile(dsurv1[,2])[4]} & \Sexpr{max(dsurv1[,2])} & \Sexpr{mean(dsurv1[,2])-0.75} & \Sexpr{rmse(rep(mean(dsurv1[,2]),1000), dsurv1[,2])}\\
+\multicolumn{2}{l}{$n=1000$} &&  &  & &  & & & & \\
+& Dynamic MSM && \Sexpr{min(dmsm2[,2])} & \Sexpr{quantile(dmsm2[,2])[2]} & \Sexpr{quantile(dmsm2[,2])[3]} & \Sexpr{mean(dmsm2[,2])} (\Sexpr{sd(dmsm2[,2])}) & \Sexpr{quantile(dmsm2[,2])[4]} & \Sexpr{max(dmsm2[,2])} & \Sexpr{mean(dmsm2[,2])-0.75} & \Sexpr{rmse(rep(mean(dmsm2[,2]),1000), dmsm2[,2])}\\
+& DWSurv && \Sexpr{min(dsurv2[,2])} & \Sexpr{quantile(dsurv2[,2])[2]} & \Sexpr{quantile(dsurv2[,2])[3]} & \Sexpr{mean(dsurv2[,2])} (\Sexpr{sd(dsurv2[,2])}) & \Sexpr{quantile(dsurv2[,2])[4]} & \Sexpr{max(dsurv2[,2])} & \Sexpr{mean(dsurv2[,2])-0.75} & \Sexpr{rmse(rep(mean(dsurv2[,2]),1000), dsurv2[,2])}\\
+\multicolumn{2}{l}{$n=5000$} &&  &  & &  & & & & \\
+& Dynamic MSM && \Sexpr{min(dmsm3[,2])} & \Sexpr{quantile(dmsm3[,2])[2]} & \Sexpr{quantile(dmsm3[,2])[3]} & \Sexpr{mean(dmsm3[,2])} (\Sexpr{sd(dmsm3[,2])}) & \Sexpr{quantile(dmsm3[,2])[4]} & \Sexpr{max(dmsm3[,2])} & \Sexpr{mean(dmsm3[,2])-0.75} & \Sexpr{rmse(rep(mean(dmsm3[,2]),1000), dmsm3[,2])}\\
+& DWSurv && \Sexpr{min(dsurv3[,2])} & \Sexpr{quantile(dsurv3[,2])[2]} & \Sexpr{quantile(dsurv3[,2])[3]} & \Sexpr{mean(dsurv3[,2])} (\Sexpr{sd(dsurv3[,2])}) & \Sexpr{quantile(dsurv3[,2])[4]} & \Sexpr{max(dsurv3[,2])} & \Sexpr{mean(dsurv3[,2])-0.75} & \Sexpr{rmse(rep(mean(dsurv3[,2]),1000), dsurv3[,2])}\\
+\bottomrule
+\end{tabular}}}
+\end{table}
+
+\end{document}
+

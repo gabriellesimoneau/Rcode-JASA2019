@@ -1,7 +1,8 @@
 library(survival)
 library(DTRreg)
 expit <- function(x) exp(x) / (1 + exp(x))
-mainpath <- "C:/Users/Gabrielle/Google Drive/McGill - PhD/Thesis/dw-SM/JASA/Supplementary Material/Reproduce_simulations_results/"
+# mainpath: location of the folder "Reproduce_simulations_results"
+mainpath <- ""
 
 # true parameters
 theta1 <- c(6.31578947, 1.5, -0.8, 0.1, 0.1)

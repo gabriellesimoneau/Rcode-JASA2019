@@ -18,7 +18,7 @@ library(hydroGOF)
 library(DTRreg)
 
 # mainpath refers to the location of the folder 'Reproduce_simulations_results'
-mainpath <- "C:/Users/Gabrielle/Google Drive/McGill - PhD/Thesis/dw-SM/JASA_updatedSERA/Supplementary Material/Reproduce_simulations_results/"
+mainpath <- ""
 secpath <- "Comparison_value_search/"
 setwd(paste(mainpath, secpath, sep = ""))
 
