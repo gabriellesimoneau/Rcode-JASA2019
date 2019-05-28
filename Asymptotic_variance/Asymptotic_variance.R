@@ -63,9 +63,9 @@ for(n in c(500, 1000, 10000)){
     Y2[delta == 1 & eta2 == 0] <- 0
     Y2[delta == 1 & eta2 == 1] <- exp(logT2)
     
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
     
     est_psidWSurv1[i,] <- mod$psi[[1]]
     est_psidWSurv2[i,] <- mod$psi[[2]]
@@ -135,9 +135,9 @@ for(n in c(500, 1000, 10000)){
     Y2[delta == 1 & eta2 == 0] <- 0
     Y2[delta == 1 & eta2 == 1] <- exp(logT2)
     
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), status = delta, blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list( ~ 1, ~ 1), var.estim = "asymptotic", data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), status = delta, blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list( ~ 1, ~ 1), var.estim = "asymptotic", data = mydata)
     
     est_psidWSurv1[i,] <- mod$psi[[1]]
     est_psidWSurv2[i,] <- mod$psi[[2]]
@@ -207,9 +207,9 @@ for(n in c(500, 1000, 10000)){
     Y2[delta == 1 & eta2 == 0] <- 0
     Y2[delta == 1 & eta2 == 1] <- exp(logT2)
     
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(Y1, Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
+    mod <- DWSurv(time = list(Y1, Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
     
     est_psidWSurv1[i,] <- mod$psi[[1]]
     est_psidWSurv2[i,] <- mod$psi[[2]]
@@ -279,9 +279,9 @@ for(n in c(500, 1000, 10000)){
     Y2[delta == 1 & eta2 == 0] <- 0
     Y2[delta == 1 & eta2 == 1] <- exp(logT2)
     
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
     
     est_psidWSurv1[i,] <- mod$psi[[1]]
     est_psidWSurv2[i,] <- mod$psi[[2]]
@@ -357,9 +357,9 @@ for(n in c(500, 1000, 10000)){
     Y2[delta == 1 & eta2 == 0] <- 0
     Y2[delta == 1 & eta2 == 1] <- exp(logT2)
     
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
     
     est_psidWSurv1[i,] <- mod$psi[[1]]
     est_psidWSurv2[i,] <- mod$psi[[2]]
@@ -435,9 +435,9 @@ for(n in c(500, 1000, 10000)){
     Y2[delta == 1 & eta2 == 0] <- 0
     Y2[delta == 1 & eta2 == 1] <- exp(logT2)
     
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), var.estim = "asymptotic", data = mydata)
     
     est_psidWSurv1[i,] <- mod$psi[[1]]
     est_psidWSurv2[i,] <- mod$psi[[2]]
