@@ -66,9 +66,9 @@ for(n in c(500, 1000, 10000)){
     trueA1opt <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
     trueA2opt <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
 
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
 
     estA1opt <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     estA2opt <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
@@ -199,9 +199,9 @@ for(n in c(500, 1000, 10000)){
     trueA1opt <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
     trueA2opt <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
     
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ X1, delta ~ X1), data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ X1, delta ~ X1), data = mydata)
     
     estA1opt <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     estA2opt <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
@@ -308,9 +308,9 @@ for(n in c(500, 1000, 10000)){
     trueA1opt <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
     trueA2opt <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
 
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
 
     estA1opt <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     estA2opt <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
@@ -441,9 +441,9 @@ for(n in c(500, 1000, 10000)){
     trueA1opt <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
     trueA2opt <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
 
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ X1, delta ~ X1), data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ X1, delta ~ X1), data = mydata)
 
     estA1opt <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     estA2opt <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
@@ -496,7 +496,7 @@ for(n in c(500, 1000, 10000)){
 }
 
 
-#### Censoring dependent on time-varying covariates (dWSurv only), 30% censoring, scenarios 1-4, n=500,1000,10000 ####
+#### Censoring dependent on time-varying covariates (DWSurv only), 30% censoring, scenarios 1-4, n=500,1000,10000 ####
 set.seed(994)
 
 for(n in c(500, 1000, 10000)){
@@ -555,9 +555,9 @@ for(n in c(500, 1000, 10000)){
     trueA1opt <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
     trueA2opt <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
     
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ X1, delta ~ X1), data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ X1, delta ~ X1), data = mydata)
     
     estA1opt <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     estA2opt <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
@@ -570,7 +570,7 @@ for(n in c(500, 1000, 10000)){
   write.table(dWSurv, file = name1)
 }
 
-#### Censoring dependent on time-varying covariates (dWSurv only), 60% censoring, scenarios 1-4, n=500,1000,10000 ####
+#### Censoring dependent on time-varying covariates (DWSurv only), 60% censoring, scenarios 1-4, n=500,1000,10000 ####
 set.seed(276)
 
 for(n in c(500, 1000, 10000)){
@@ -629,9 +629,9 @@ for(n in c(500, 1000, 10000)){
     trueA1opt <- ifelse(theta1[4] + theta1[5]*X1 > 0, 1, 0)
     trueA2opt <- ifelse(theta2[4] + theta2[5]*X2 > 0, 1, 0)
     
-    #### fit dWSurv ####
+    #### fit DWSurv ####
     mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-    mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ X1, delta ~ X1), data = mydata)
+    mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ X1, delta ~ X1), data = mydata)
     
     estA1opt <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     estA2opt <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
