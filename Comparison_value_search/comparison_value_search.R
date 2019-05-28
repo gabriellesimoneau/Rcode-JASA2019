@@ -67,9 +67,9 @@ for(n in c(500,1000,5000)){
     }
     dmsm1[i,2] <- mytheta <- ltheta[which(eyopt == max(eyopt))][1]
     
-    # dwsurv
+    # DWSurv
     # fit model and extract estimates
-    model <- dWSurv(time = list(~Y), blip.mod = list(~ X11), treat.mod = list(A1 ~ X11), tf.mod = list( ~ X11 + X12), cens.mod = list(delta ~ X12), var.estim = "none", data = mydata)
+    model <- DWSurv(time = list(~Y), blip.mod = list(~ X11), treat.mod = list(A1 ~ X11), tf.mod = list( ~ X11 + X12), cens.mod = list(delta ~ X12), var.estim = "none", data = mydata)
     blip <- as.numeric(coef(model)$`stage1`)
     dsurv1[i,2] <- -blip[1]/blip[2]
     
@@ -133,9 +133,9 @@ for(n in c(500,1000,5000)){
     }
     dmsm2[i,2] <- mytheta <- ltheta[which(eyopt == max(eyopt))][1]
     
-    # dwsurv
+    # DWSurv
     # fit model and extract estimates
-    model <- dWSurv(time = list(~Y), blip.mod = list(~ X11), treat.mod = list(A1 ~ X11), tf.mod = list( ~ X11 + X12), cens.mod = list(delta ~ X12), var.estim = "none", data = mydata)
+    model <- DWSurv(time = list(~Y), blip.mod = list(~ X11), treat.mod = list(A1 ~ X11), tf.mod = list( ~ X11 + X12), cens.mod = list(delta ~ X12), var.estim = "none", data = mydata)
     blip <- as.numeric(coef(model)$`stage1`)
     dsurv2[i,2] <- -blip[1]/blip[2]
     

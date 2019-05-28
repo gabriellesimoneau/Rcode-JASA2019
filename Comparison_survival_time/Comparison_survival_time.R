@@ -59,9 +59,9 @@ for(n in c(500, 1000)){
   Y2[delta == 1 & eta2 == 0] <- 0
   Y2[delta == 1 & eta2 == 1] <- exp(logT2)
 
-  # fit dWSurv
+  # fit DWSurv
   mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
 
   # fit Huang and Ning
   logY2 <- log(Y2[eta2 == 1 & delta == 1])
@@ -178,7 +178,7 @@ for(n in c(500, 1000)){
     if(min(T1) <= 0) next
     optimal <- logT
 
-    # dWSurv optimal
+    # DWSurv optimal
     A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
     logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
@@ -255,9 +255,9 @@ for(n in c(500, 1000)){
   Y2[delta == 1 & eta2 == 0] <- 0
   Y2[delta == 1 & eta2 == 1] <- exp(logT2)
   
-  # fit dWSurv
+  # fit DWSurv
   mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
   
   # fit Huang and Ning
   logY2 <- log(Y2[eta2 == 1 & delta == 1])
@@ -353,7 +353,7 @@ for(n in c(500, 1000)){
     if(min(T1) <= 0) next
     optimal <- logT
     
-    # dWSurv optimal
+    # DWSurv optimal
     A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
     logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
@@ -430,9 +430,9 @@ for(n in c(500, 1000)){
   Y2[delta == 1 & eta2 == 0] <- 0
   Y2[delta == 1 & eta2 == 1] <- exp(logT2)
   
-  # fit dWSurv
+  # fit DWSurv
   mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
   
   # fit Huang and Ning
   logY2 <- log(Y2[eta2 == 1 & delta == 1])
@@ -549,7 +549,7 @@ for(n in c(500, 1000)){
     if(min(T1) <= 0) next
     optimal <- logT
     
-    # dWSurv optimal
+    # DWSurv optimal
     A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
     logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
@@ -626,9 +626,9 @@ for(n in c(500, 1000)){
   Y2[delta == 1 & eta2 == 0] <- 0
   Y2[delta == 1 & eta2 == 1] <- exp(logT2)
 
-  # fit dWSurv
+  # fit DWSurv
   mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
 
   # fit Huang and Ning
   logY2 <- log(Y2[eta2 == 1 & delta == 1])
@@ -724,7 +724,7 @@ for(n in c(500, 1000)){
     if(min(T1) <= 0) next
     optimal <- logT
 
-    # dWSurv optimal
+    # DWSurv optimal
     A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
     logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
@@ -807,9 +807,9 @@ for(n in c(500, 1000)){
   Y2[delta == 1 & eta2 == 0] <- 0
   Y2[delta == 1 & eta2 == 1] <- exp(logT2)
   
-  # fit dWSurv
+  # fit DWSurv
   mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
   
   # simulate large dataset according to different treatment allocation
   n_large <- 10000
@@ -874,7 +874,7 @@ for(n in c(500, 1000)){
     if(min(T1) <= 0) next
     optimal <- logT
     
-    # dWSurv optimal
+    # DWSurv optimal
     A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
     logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
@@ -946,9 +946,9 @@ for(n in c(500, 1000)){
   Y2[delta == 1 & eta2 == 0] <- 0
   Y2[delta == 1 & eta2 == 1] <- exp(logT2)
   
-  # fit dWSurv
+  # fit DWSurv
   mydata <- as.data.frame(cbind(X1, X14, A1, X2, X23, A2, delta, Y1, Y2))
-  mod <- dWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
+  mod <- DWSurv(time = list(~Y1, ~Y2), blip.mod = list(~ X1, ~ X2), treat.mod = list(A1 ~ X1, A2 ~ X2), tf.mod = list( ~ X1 + X14, ~ X2 + X23 + X1), cens.mod = list(delta ~ 1, delta ~ 1), data = mydata)
   
   # simulate large dataset according to different treatment allocation
   n_large <- 10000
@@ -1013,7 +1013,7 @@ for(n in c(500, 1000)){
     if(min(T1) <= 0) next
     optimal <- logT
     
-    # dWSurv optimal
+    # DWSurv optimal
     A1 <- ifelse(mod$psi[[1]][1] + mod$psi[[1]][2]*X1 > 0, 1, 0)
     A2 <- ifelse(mod$psi[[2]][1] + mod$psi[[2]][2]*X2 > 0, 1, 0)
     logT2 <- theta2[1] + theta2[2]*X2[eta2 == 1] + theta2[3]*X23[eta2 == 1] + theta2[4]*A2[eta2 == 1] + theta2[5]*A2[eta2 == 1]*X2[eta2 == 1] + theta2[6]*X1[eta2 == 1] + rnorm(sum(eta2), sd = 0.3)
